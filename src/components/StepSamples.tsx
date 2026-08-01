@@ -6,11 +6,13 @@ import { SectionHead, StepHead } from './Ui'
 interface Props {
   samples: Sample[]
   groups: string[]
+  /** True when the groups were inferred from the file names, not typed. */
+  detected: boolean
   onSamples: (s: Sample[]) => void
   onGroups: (g: string[]) => void
 }
 
-export default function StepSamples({ samples, groups, onSamples, onGroups }: Props) {
+export default function StepSamples({ samples, groups, detected, onSamples, onGroups }: Props) {
   const [groupText, setGroupText] = useState(groups.join(', '))
   const [find, setFind] = useState('')
   const [repl, setRepl] = useState('')
@@ -49,6 +51,12 @@ export default function StepSamples({ samples, groups, onSamples, onGroups }: Pr
         <p className="mt-1.5 text-[11.5px]" style={{ color: 'var(--ink-3)' }}>
           Comma-separated. Two groups is the standard comparison; more is fine, we run each against the control.
         </p>
+        {detected && (
+          <p className="mt-1.5 text-[11.5px]" style={{ color: 'var(--ink-2)' }}>
+            <b>{groups.length} groups</b> and every sample's assignment were read from your file
+            names — check the table below and correct anything that is wrong.
+          </p>
+        )}
       </div>
 
       <div>

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { AnswerKey, Answers, Contact, FastqFile, Inferences, Pairing, Sample } from './types'
 import { buildSamples, detectLayout, isFastq, usedGroups } from './lib/scan'
 import { inferFromScan } from './lib/infer'
+import { detectGroups, isUsableDetection } from './lib/groups'
 import { makeRequestId } from './lib/request'
 import { demoCondition, demoFiles } from './lib/demo'
 import StepFiles from './components/StepFiles'
@@ -34,6 +35,7 @@ export default function App() {
   const [pairing, setPairing] = useState<Pairing>('auto')
   const [samples, setSamples] = useState<Sample[]>([])
   const [groups, setGroups] = useState<string[]>(['Control', 'Treated'])
+  const [detectedGroups, setDetectedGroups] = useState(false)
   const [answers, setAnswers] = useState<Answers>(EMPTY_ANSWERS)
   const [contact, setContact] = useState<Contact>(EMPTY_CONTACT)
   const [touched, setTouched] = useState<AnswerKey[]>([])
@@ -86,6 +88,18 @@ export default function App() {
     setAutoCleared(true)
   }
 
+  /** Samples plus a design guessed from their names — 69 dropdowns is not a task. */
+  const withDetectedGroups = (list: Sample[]) => {
+    const detected = detectGroups(list.map(x => x.id))
+    if (!isUsableDetection(detected, list.map(x => x.id))) return { samples: list, groups: null }
+    const byId = new Map<string, string>()
+    for (const g of detected) for (const id of g.samples) byId.set(id, g.name)
+    return {
+      samples: list.map(x => ({ ...x, condition: byId.get(x.id) ?? x.condition })),
+      groups: detected.map(g => g.name),
+    }
+  }
+
   /* ---------- file intake ---------- */
   const ingest = (incoming: FastqFile[]) => {
     const fastq = incoming.filter(f => isFastq(f.name))
@@ -94,7 +108,14 @@ export default function App() {
     merged.sort((a, b) => a.path.localeCompare(b.path, undefined, { numeric: true }))
 
     setFiles(merged)
-    setSamples(s => buildSamples(merged, pairing, s))
+    setSamples(prev => {
+      const built = buildSamples(merged, pairing, prev)
+      // Only infer on a fresh scan; never overwrite conditions already assigned.
+      if (prev.length) return built
+      const { samples: withGroups, groups } = withDetectedGroups(built)
+      if (groups) { setGroups(groups); setDetectedGroups(true) }
+      return withGroups
+    })
     setOther(incoming.filter(f => !isFastq(f.name)).map(f => f.name))
     setScanned(true)
     setAutoCleared(false)   // a changed corpus deserves a fresh look
@@ -214,7 +235,9 @@ export default function App() {
               />
             )}
             {step === 1 && (
-              <StepSamples samples={samples} groups={groups} onSamples={setSamples} onGroups={setGroups} />
+              <StepSamples
+                samples={samples} groups={groups} detected={detectedGroups}
+                onSamples={setSamples} onGroups={setGroups} />
             )}
             {step === 2 && (
               <StepDesign
