@@ -205,7 +205,8 @@ export default function App() {
         </nav>
 
         <main>
-          <section className="panel">
+          {/* key={step} remounts on each step, which re-fires the @starting-style entrance */}
+          <section className="panel step-enter" key={step}>
             {step === 0 && (
               <StepFiles
                 files={files} other={other} scanned={scanned} pairing={pairing} samples={samples}

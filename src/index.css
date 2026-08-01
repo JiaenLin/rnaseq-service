@@ -7,6 +7,12 @@
    steps, so the sequence itself encodes the order. */
 :root {
   color-scheme: light dark;
+
+  /* Motion. Strong curves — the built-in easings are too weak to feel
+     intentional. Never ease-in on UI; all durations stay under 300ms. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
   --bg: #f5f7f9;
   --panel: #ffffff;
   --panel-2: #fafbfc;
@@ -82,7 +88,13 @@ body {
     background: var(--panel);
     color: var(--ink);
     border: 1px solid var(--line-2);
-    @apply inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition;
+    @apply inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium;
+    transition: transform 160ms var(--ease-out), color 160ms ease, border-color 160ms ease,
+      background-color 160ms ease;
+  }
+  /* Press feedback — instant confirmation the click was heard. Subtle (0.95–0.98). */
+  .btn:active:not(:disabled) {
+    transform: scale(0.97);
   }
   .btn:hover:not(:disabled) {
     border-color: var(--accent);
@@ -105,11 +117,15 @@ body {
     background: var(--panel);
     border: 1px solid var(--line-2);
     color: var(--ink-2);
-    @apply cursor-pointer rounded-md px-2.5 py-1 font-mono text-xs transition;
+    @apply cursor-pointer rounded-md px-2.5 py-1 font-mono text-xs;
+    transition: transform 160ms var(--ease-out), color 160ms ease, border-color 160ms ease;
   }
   .chip:hover {
     border-color: var(--accent);
     color: var(--accent);
+  }
+  .chip:active:not(:disabled) {
+    transform: scale(0.97);
   }
 
   .input {
@@ -126,7 +142,12 @@ body {
   .opt {
     background: var(--panel);
     border: 1px solid var(--line-2);
-    @apply flex cursor-pointer items-start gap-3 rounded-xl px-3.5 py-3 transition;
+    @apply flex cursor-pointer items-start gap-3 rounded-xl px-3.5 py-3;
+    transition: transform 160ms var(--ease-out), background-color 160ms ease, border-color 160ms ease;
+  }
+  /* Gentler than a button: on a large surface 0.97 reads as a lurch. */
+  .opt:active {
+    transform: scale(0.99);
   }
   .opt:hover {
     background: var(--panel-2);
@@ -187,13 +208,36 @@ body {
     color: var(--ink-2);
     @apply rounded-r-lg px-3.5 py-2.5 text-sm;
   }
+
+  /* Wizard steps. Seen four times a session, so a standard entrance is earned:
+     without it the whole panel teleports. Settles to transform:none so the
+     finished panel never becomes a containing block for its sticky children. */
+  .step-enter {
+    opacity: 1;
+    transform: none;
+    transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+  }
 }
 
+@starting-style {
+  .step-enter {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+/* Reduced motion means fewer and gentler animations, not none: keep the opacity
+   fades that explain what appeared, drop only what moves or scales. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    transition: none !important;
-    animation: none !important;
+  .btn:active:not(:disabled),
+  .chip:active:not(:disabled),
+  .opt:active {
+    transform: none;
+  }
+
+  @starting-style {
+    .step-enter {
+      transform: none;
+    }
   }
 }
