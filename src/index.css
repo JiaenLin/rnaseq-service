@@ -1,0 +1,199 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Cool-slate neutrals with an indigo accent, matching RNA-seq Studio and Lab.
+   The four A/C/G/T hues are this app's own signature — they mark the wizard
+   steps, so the sequence itself encodes the order. */
+:root {
+  color-scheme: light dark;
+  --bg: #f5f7f9;
+  --panel: #ffffff;
+  --panel-2: #fafbfc;
+  --sunk: #f1f4f7;
+  --ink: #0f172a;
+  --ink-2: #4a5769;
+  --ink-3: #8b98ab;
+  --line: #e3e8ee;
+  --line-2: #cdd6e0;
+  --accent: #4f46e5;
+  --accent-soft: #eef0ff;
+  --A: #15803d; --C: #1d4ed8; --G: #b45309; --T: #b91c1c;
+  --A-bg: #e7f6ec; --C-bg: #e8effd; --G-bg: #fdf1e0; --T-bg: #fdeaea;
+  --ok: #15803d; --ok-bg: #e7f6ec;
+  --warn: #b45309; --warn-bg: #fdf1e0;
+  --crit: #b91c1c; --crit-bg: #fdeaea;
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 24px -12px rgba(15, 23, 42, 0.18);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #080d18;
+    --panel: #111a2b;
+    --panel-2: #0d1524;
+    --sunk: #0b1220;
+    --ink: #e8eef8;
+    --ink-2: #a3b2c9;
+    --ink-3: #6b7c95;
+    --line: #1f2b40;
+    --line-2: #31415c;
+    --accent: #8b93ff;
+    --accent-soft: #1b1f45;
+    --A: #5cd68a; --C: #7aa7ff; --G: #f0b447; --T: #ff8a8a;
+    --A-bg: #0f2a1b; --C-bg: #111f3d; --G-bg: #2c2110; --T-bg: #2e1517;
+    --ok: #5cd68a; --ok-bg: #0f2a1b;
+    --warn: #f0b447; --warn-bg: #2c2110;
+    --crit: #ff8a8a; --crit-bg: #2e1517;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px -16px rgba(0, 0, 0, 0.7);
+  }
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@layer components {
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    @apply rounded-2xl p-6;
+  }
+
+  .btn {
+    background: var(--panel);
+    color: var(--ink);
+    border: 1px solid var(--line-2);
+    @apply inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition;
+  }
+  .btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn:disabled {
+    @apply cursor-not-allowed opacity-40;
+  }
+  .btn-primary {
+    background: var(--accent);
+    border-color: transparent;
+    @apply text-white;
+  }
+  .btn-primary:hover:not(:disabled) {
+    color: #fff;
+    filter: brightness(1.08);
+  }
+
+  .chip {
+    background: var(--panel);
+    border: 1px solid var(--line-2);
+    color: var(--ink-2);
+    @apply cursor-pointer rounded-md px-2.5 py-1 font-mono text-xs transition;
+  }
+  .chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .input {
+    background: var(--panel);
+    border: 1px solid var(--line-2);
+    @apply w-full rounded-md px-2.5 py-1.5 text-sm outline-none transition;
+  }
+  .input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  /* MCQ / checkbox option card */
+  .opt {
+    background: var(--panel);
+    border: 1px solid var(--line-2);
+    @apply flex cursor-pointer items-start gap-3 rounded-xl px-3.5 py-3 transition;
+  }
+  .opt:hover {
+    background: var(--panel-2);
+    border-color: var(--accent);
+  }
+  .opt:has(input:checked) {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--accent);
+  }
+  .opt input {
+    accent-color: var(--accent);
+    @apply mt-0.5 h-4 w-4 flex-none;
+  }
+
+  .eyebrow {
+    color: var(--ink-3);
+    @apply font-mono text-[10.5px] uppercase tracking-[0.14em];
+  }
+
+  .tag {
+    background: var(--sunk);
+    color: var(--ink-3);
+    @apply ml-1.5 whitespace-nowrap rounded px-1.5 py-px font-mono text-[10px] tracking-wide;
+  }
+  .tag-rec { background: var(--ok-bg); color: var(--ok); }
+  .tag-det { background: var(--C-bg); color: var(--C); }
+  .tag-asm { background: var(--warn-bg); color: var(--warn); }
+
+  .pill {
+    @apply inline-flex items-center rounded-full px-2 py-px font-mono text-[11px] font-semibold;
+  }
+
+  /* A/C/G/T step marker */
+  .base-mark {
+    @apply grid h-[26px] w-[26px] flex-none place-items-center rounded-lg font-mono text-[13px] font-bold leading-none;
+  }
+  .base-a { background: var(--A-bg); color: var(--A); }
+  .base-c { background: var(--C-bg); color: var(--C); }
+  .base-g { background: var(--G-bg); color: var(--G); }
+  .base-t { background: var(--T-bg); color: var(--T); }
+
+  .stat {
+    background: var(--sunk);
+    border: 1px solid var(--line);
+    @apply rounded-xl px-3 py-2.5;
+  }
+
+  .note {
+    background: var(--accent-soft);
+    border-left: 2.5px solid var(--accent);
+    color: var(--ink-2);
+    @apply rounded-r-lg px-3.5 py-2.5 text-sm;
+  }
+  .warnbox {
+    background: var(--warn-bg);
+    border-left: 2.5px solid var(--warn);
+    color: var(--ink-2);
+    @apply rounded-r-lg px-3.5 py-2.5 text-sm;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
