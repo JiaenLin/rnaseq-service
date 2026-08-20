@@ -31,8 +31,22 @@ Read pairs are grouped from the naming schemes that actually turn up in deliveri
 Sample_S1_L001_R1_001.fastq.gz    bcl2fastq / BCL Convert
 Sample_L001_R1.fastq.gz           simplified Illumina
 Sample_R1.fq.gz                   most core facilities
-Sample_1.fq.gz                    SRA / BGI
+Sample-R1.fq.gz                   hyphenated variant
+Sample.R1.raw.fastq.gz            MGI / DNBSEQ-T7
+V350012345_L01_read_1.fq.gz       MGI raw lane split
+Sample_1.clean.fq.gz              SRA / BGI / Novogene
 ```
+
+`.raw`, `.clean`, `.filtered`, `.trimmed` and the bcl2fastq `_001` chunk index are
+stripped when they follow a read tag. When a delivery gives every sample its own
+folder and reuses one filename inside each — the usual MGI/T7 raw layout — the
+folder name becomes the sample identity instead of the filename.
+
+Operating-system bookkeeping is skipped before anything is counted: macOS
+AppleDouble sidecars (`._Sample.R1.fastq.gz`, written whenever a delivery passes
+through an exFAT drive or an SMB share), `.DS_Store`, `__MACOSX/`, `Thumbs.db`
+and friends. A sidecar ends in `.fastq.gz` too, so left in it would double the
+file count and make every paired sample look single-end.
 
 If the guess is wrong, switch grouping to **one sample per file** on step A.
 

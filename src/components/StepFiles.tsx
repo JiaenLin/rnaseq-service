@@ -6,6 +6,7 @@ import { SectionHead, Stat, StepHead } from './Ui'
 interface Props {
   files: FastqFile[]
   other: string[]
+  skipped: number
   scanned: boolean
   pairing: Pairing
   samples: Sample[]
@@ -78,6 +79,11 @@ export default function StepFiles(p: Props) {
           <b>No FASTQ files found in that folder.</b> If your provider delivered a{' '}
           <code className="font-mono">.tar</code> or <code className="font-mono">.zip</code> archive,
           unpack it first, then drop the unpacked folder here.
+          {!!p.skipped && (
+            <> Everything in it looked like operating-system bookkeeping
+            ({p.skipped} file{p.skipped > 1 ? 's' : ''} such as macOS{' '}
+            <code className="font-mono">._</code> sidecars).</>
+          )}
         </div>
       )}
 
@@ -162,6 +168,14 @@ export default function StepFiles(p: Props) {
               <p className="mt-2.5 font-mono text-xs" style={{ color: 'var(--ink-3)' }}>
                 Ignored {p.other.length} non-FASTQ file{p.other.length > 1 ? 's' : ''}{' '}
                 ({p.other.slice(0, 3).join(', ')}{p.other.length > 3 ? ', …' : ''})
+              </p>
+            )}
+
+            {!!p.skipped && (
+              <p className="mt-1 font-mono text-xs" style={{ color: 'var(--ink-3)' }}>
+                Skipped {p.skipped} operating-system file{p.skipped > 1 ? 's' : ''}{' '}
+                (macOS <code>._</code> sidecars, <code>.DS_Store</code>, <code>__MACOSX</code>) —
+                these are copies of your delivery&rsquo;s metadata, not sequencing data.
               </p>
             )}
           </div>

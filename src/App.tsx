@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { AnswerKey, Answers, Contact, FastqFile, Inferences, Pairing, Sample } from './types'
-import { buildSamples, detectLayout, isFastq, usedGroups } from './lib/scan'
+import { buildSamples, detectLayout, isFastq, isJunk, usedGroups } from './lib/scan'
 import { inferFromScan } from './lib/infer'
 import { detectGroups, isUsableDetection } from './lib/groups'
 import { makeRequestId } from './lib/request'
@@ -31,6 +31,7 @@ export default function App() {
   const [step, setStep] = useState(0)
   const [files, setFiles] = useState<FastqFile[]>([])
   const [other, setOther] = useState<string[]>([])
+  const [skipped, setSkipped] = useState(0)
   const [scanned, setScanned] = useState(false)
   const [pairing, setPairing] = useState<Pairing>('auto')
   const [samples, setSamples] = useState<Sample[]>([])
@@ -102,7 +103,11 @@ export default function App() {
 
   /* ---------- file intake ---------- */
   const ingest = (incoming: FastqFile[]) => {
-    const fastq = incoming.filter(f => isFastq(f.name))
+    // Drop OS bookkeeping first. A macOS AppleDouble sidecar is named
+    // `._Sample.R1.fastq.gz`, so it passes every FASTQ test we have and would
+    // otherwise double the file count and halve the pairing.
+    const real = incoming.filter(f => !isJunk(f.path))
+    const fastq = real.filter(f => isFastq(f.name))
     const seen = new Set(files.map(f => f.path))
     const merged = [...files, ...fastq.filter(f => !seen.has(f.path))]
     merged.sort((a, b) => a.path.localeCompare(b.path, undefined, { numeric: true }))
@@ -116,13 +121,14 @@ export default function App() {
       if (groups) { setGroups(groups); setDetectedGroups(true) }
       return withGroups
     })
-    setOther(incoming.filter(f => !isFastq(f.name)).map(f => f.name))
+    setOther(real.filter(f => !isFastq(f.name)).map(f => f.name))
+    setSkipped(incoming.length - real.length)
     setScanned(true)
     setAutoCleared(false)   // a changed corpus deserves a fresh look
   }
 
   const reset = () => {
-    setFiles([]); setSamples([]); setOther([]); setScanned(false); setAutoCleared(false)
+    setFiles([]); setSamples([]); setOther([]); setSkipped(0); setScanned(false); setAutoCleared(false)
   }
 
   const loadDemo = () => {
@@ -130,6 +136,7 @@ export default function App() {
     const fastq = list.filter(f => isFastq(f.name))
     setFiles(fastq)
     setOther(list.filter(f => !isFastq(f.name)).map(f => f.name))
+    setSkipped(0)
     setSamples(buildSamples(fastq, pairing).map(s => ({ ...s, condition: demoCondition(s.name) })))
     setGroups(['Control', 'Treated'])
     setScanned(true)
@@ -230,7 +237,7 @@ export default function App() {
           <section className="panel step-enter" key={step}>
             {step === 0 && (
               <StepFiles
-                files={files} other={other} scanned={scanned} pairing={pairing} samples={samples}
+                files={files} other={other} skipped={skipped} scanned={scanned} pairing={pairing} samples={samples}
                 onIngest={ingest} onPairing={repair} onDemo={loadDemo} onReset={reset}
               />
             )}
