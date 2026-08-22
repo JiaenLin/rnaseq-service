@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Sample } from '../types'
 import { usedGroups } from '../lib/scan'
 import { SectionHead, StepHead } from './Ui'
+import { numberingGaps } from '../lib/identity'
 
 interface Props {
   samples: Sample[]
@@ -27,6 +28,7 @@ export default function StepSamples({ samples, groups, detected, onSamples, onGr
     samples.map(s => s.name).filter((n, i, arr) => arr.indexOf(n) !== i),
   )
   const assigned = usedGroups(samples)
+  const gaps = numberingGaps(samples.map(s => s.name))
 
   return (
     <div className="space-y-6">
@@ -137,6 +139,31 @@ export default function StepSamples({ samples, groups, detected, onSamples, onGr
             : 'No groups assigned yet.'}
         </p>
       </div>
+
+      {/* A reminder, not a gate.
+          Which tube holds which animal cannot be checked from a file name, so
+          nothing here validates it and nothing is blocked. It is said once,
+          where the assignment is actually made, because it is the one mistake
+          no software downstream can catch — a real request went out with two
+          conditions exchanged and every step after this one carried it
+          faithfully to the end. */}
+      {assigned.length > 0 && (
+        <div className="warnbox">
+          <b>Only you can check this.</b> Group assignment is taken on trust by everything
+          downstream — the pipeline, the statistics and the figures all carry it without
+          question, and a sample in the wrong group produces a result rather than an error.
+          Worth a moment against your own tube record, or a note to your sequencing provider,
+          before you send this.
+          {gaps.length > 0 && (
+            <>
+              {' '}Your samples are numbered with{' '}
+              {gaps.length === 1 ? 'a gap' : 'gaps'} at <b>{gaps.join(', ')}</b> — so if you
+              assigned groups by counting down a list rather than reading each tube, everything
+              after {gaps.length === 1 ? 'it' : 'them'} is off by {gaps.length}.
+            </>
+          )}
+        </div>
+      )}
 
       {!!dups.size && (
         <div className="warnbox">
