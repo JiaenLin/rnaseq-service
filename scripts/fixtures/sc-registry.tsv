@@ -1,0 +1,2 @@
+species	build	path	built_by	star_version	notes
+homo_sapiens	GRCh38-2024-A	-	the provider (Cell Ranger output)	-	request RTEST01: count matrices delivered, so nothing aligns and no index path is needed

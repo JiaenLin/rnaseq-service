@@ -1,0 +1,93 @@
+{
+  "source": {
+    "repository": "scQC",
+    "commit": "0a9d2ced6ed1732706ea2154b4ad9001e7729707",
+    "written_by": "node scripts/scqc-contract.mjs <scQC checkout>"
+  },
+  "samplesheet": {
+    "required": {
+      "from": "modules/00_ingest/ingest.py:49",
+      "columns": [
+        "sample",
+        "platform",
+        "species",
+        "reference",
+        "assay"
+      ]
+    },
+    "not_factors": {
+      "from": "engine/steps.py:92-97",
+      "columns": [
+        "sample",
+        "platform",
+        "species",
+        "reference",
+        "assay",
+        "fastq_r1",
+        "fastq_r2",
+        "matrix",
+        "dbr",
+        "dbr_sd",
+        "mt_prefix",
+        "ribo_pattern",
+        "expected_genes",
+        "aligner_cells",
+        "cellbender_barcodes",
+        "cellreads_stats",
+        "nf_antisense",
+        "ambient_h5",
+        "ambient_tool",
+        "ambient_version",
+        "ambient_params",
+        "ambient_produced_by"
+      ]
+    },
+    "assays": {
+      "from": "modules/00_ingest/ingest.py:58",
+      "values": [
+        "snrna",
+        "scrna"
+      ]
+    },
+    "platforms": {
+      "from": "modules/00_ingest/ingest.py:59",
+      "values": [
+        "10x",
+        "singleron"
+      ]
+    }
+  },
+  "registry": {
+    "columns": {
+      "from": "setup/init_project.sh:116",
+      "names": [
+        "species",
+        "build",
+        "path",
+        "built_by",
+        "star_version",
+        "notes"
+      ]
+    },
+    "delimiter": {
+      "from": "modules/00_ingest/ingest.py:149",
+      "value": "\t"
+    },
+    "header_lines": {
+      "from": "modules/00_ingest/ingest.py:147",
+      "value": 1
+    },
+    "min_fields": {
+      "from": "modules/00_ingest/ingest.py:150",
+      "value": 3
+    },
+    "key": {
+      "from": "modules/00_ingest/ingest.py:151",
+      "fields": [
+        0,
+        1
+      ],
+      "joiner": "/"
+    }
+  }
+}

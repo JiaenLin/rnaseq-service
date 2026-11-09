@@ -1,0 +1,9 @@
+sample	platform	species	reference	assay	matrix	aligner_cells	mt_prefix	ribo_pattern	dbr	factor_a	factor_b	batch
+S1	10x	homo_sapiens	homo_sapiens/GRCh38-2024-A	scrna	Human_PBMC_GRCh38-2024-A/S1/outs/raw_feature_bc_matrix	Human_PBMC_GRCh38-2024-A/S1/outs/filtered_feature_bc_matrix	MT-	^RP[SL]	0.08	a1	b1	p1
+S2	10x	homo_sapiens	homo_sapiens/GRCh38-2024-A	scrna	Human_PBMC_GRCh38-2024-A/S2/outs/raw_feature_bc_matrix	Human_PBMC_GRCh38-2024-A/S2/outs/filtered_feature_bc_matrix	MT-	^RP[SL]	0.08	a1	b1	p2
+S3	10x	homo_sapiens	homo_sapiens/GRCh38-2024-A	scrna	Human_PBMC_GRCh38-2024-A/S3/outs/raw_feature_bc_matrix	Human_PBMC_GRCh38-2024-A/S3/outs/filtered_feature_bc_matrix	MT-	^RP[SL]	0.08	a1	b2	p1
+S4	10x	homo_sapiens	homo_sapiens/GRCh38-2024-A	scrna	Human_PBMC_GRCh38-2024-A/S4/outs/raw_feature_bc_matrix	Human_PBMC_GRCh38-2024-A/S4/outs/filtered_feature_bc_matrix	MT-	^RP[SL]	0.08	a1	b2	p2
+S5	10x	homo_sapiens	homo_sapiens/GRCh38-2024-A	scrna	Human_PBMC_GRCh38-2024-A/S5/outs/raw_feature_bc_matrix	Human_PBMC_GRCh38-2024-A/S5/outs/filtered_feature_bc_matrix	MT-	^RP[SL]	0.08	a2	b1	p1
+S6	10x	homo_sapiens	homo_sapiens/GRCh38-2024-A	scrna	Human_PBMC_GRCh38-2024-A/S6/outs/raw_feature_bc_matrix	Human_PBMC_GRCh38-2024-A/S6/outs/filtered_feature_bc_matrix	MT-	^RP[SL]	0.08	a2	b1	p2
+S7	10x	homo_sapiens	homo_sapiens/GRCh38-2024-A	scrna	Human_PBMC_GRCh38-2024-A/S7/outs/raw_feature_bc_matrix	Human_PBMC_GRCh38-2024-A/S7/outs/filtered_feature_bc_matrix	MT-	^RP[SL]	0.08	a2	b2	p1
+S8	10x	homo_sapiens	homo_sapiens/GRCh38-2024-A	scrna	Human_PBMC_GRCh38-2024-A/S8/outs/raw_feature_bc_matrix	Human_PBMC_GRCh38-2024-A/S8/outs/filtered_feature_bc_matrix	MT-	^RP[SL]	0.08	a2	b2	p2

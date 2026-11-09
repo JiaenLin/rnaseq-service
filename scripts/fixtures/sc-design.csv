@@ -1,0 +1,9 @@
+sample,factor_a,factor_b,batch
+S1,a1,b1,p1
+S2,a1,b1,p2
+S3,a1,b2,p1
+S4,a1,b2,p2
+S5,a2,b1,p1
+S6,a2,b1,p2
+S7,a2,b2,p1
+S8,a2,b2,p2
