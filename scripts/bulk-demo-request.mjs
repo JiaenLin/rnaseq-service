@@ -23,7 +23,7 @@ const EMPTY_ANSWERS = {
 }
 
 const CONTACT = {
-  name: 'Jane Doe', email: 'jane@example.org', org: 'Example University', project: 'Demo request',
+  name: 'Jane Doe', email: 'jane@example.test', org: 'Example University', project: 'Demo request',
   turnaround: 'standard', notes: '', agree: true,
 }
 

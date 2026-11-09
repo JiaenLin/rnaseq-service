@@ -58,7 +58,7 @@ const FULL = () => ({
   reference: 'named', referenceName: 'GRCh38-2024-A', mtPrefix: 'MT-', riboPattern: '^RP[SL]',
   dbr: 'stated', dbrPercent: '8',
 })
-const CONTACT = { name: 'Jane Doe', email: 'jane@example.org', org: '', project: '', turnaround: 'standard', notes: '', agree: true }
+const CONTACT = { name: 'Jane Doe', email: 'jane@example.test', org: '', project: '', turnaround: 'standard', notes: '', agree: true }
 const build = (a, inferred = {}, ls = libs(), scan = crScan()) =>
   buildScRequest('RTEST01', scan, ls, a, inferred, CONTACT, '2026-01-01T00:00:00.000Z')
 const block = a => scQuestionBlocker(a, libs())
