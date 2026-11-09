@@ -14,6 +14,8 @@ interface Props {
   onPairing: (p: Pairing) => void
   onDemo: () => void
   onReset: () => void
+  /** Loads the synthetic single-cell example, which App hands to the single-cell request. */
+  onScDemo?: () => void
 }
 
 export default function StepFiles(p: Props) {
@@ -53,6 +55,7 @@ export default function StepFiles(p: Props) {
         <p className="mt-1.5 text-[13.5px]" style={{ color: 'var(--ink-2)' }}>
           We look for <code className="font-mono">.fastq</code>, <code className="font-mono">.fq</code>,{' '}
           <code className="font-mono">.fastq.gz</code> and <code className="font-mono">.fq.gz</code>, including nested sub-folders.
+          A Cell Ranger or CeleScope output folder starts a single-cell request instead.
         </p>
         <div className="mt-4 flex flex-wrap justify-center gap-2.5">
           <button className="btn btn-primary" onClick={() => dirRef.current?.click()}>Choose folder…</button>
@@ -60,6 +63,7 @@ export default function StepFiles(p: Props) {
           {p.scanned
             ? <button className="btn" onClick={p.onReset}>Reset</button>
             : <button className="btn" onClick={p.onDemo}>Try example data</button>}
+          {!p.scanned && p.onScDemo && <button className="btn" onClick={p.onScDemo}>Try a single-cell example</button>}
         </div>
         <p className="mt-3.5 font-mono text-xs" style={{ color: 'var(--ink-3)' }}>
           Your files never leave this computer — only names and sizes are read.
@@ -76,7 +80,8 @@ export default function StepFiles(p: Props) {
 
       {p.scanned && !p.files.length && (
         <div className="warnbox">
-          <b>No FASTQ files found in that folder.</b> If your provider delivered a{' '}
+          <b>No FASTQ files found in that folder</b>, and no Cell Ranger or CeleScope count matrices
+          either. If your provider delivered a{' '}
           <code className="font-mono">.tar</code> or <code className="font-mono">.zip</code> archive,
           unpack it first, then drop the unpacked folder here.
           {!!p.skipped && (

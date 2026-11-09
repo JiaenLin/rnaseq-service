@@ -5,6 +5,9 @@ import { inferFromScan } from './lib/infer'
 import { detectGroups, isUsableDetection } from './lib/groups'
 import { makeRequestId } from './lib/request'
 import { demoCondition, demoFiles } from './lib/demo'
+import { detectDelivery } from './lib/scDelivery'
+import { scDemoFiles } from './lib/scDemo'
+import ScApp from './ScApp'
 import StepFiles from './components/StepFiles'
 import StepSamples from './components/StepSamples'
 import StepDesign from './components/StepDesign'
@@ -42,6 +45,7 @@ export default function App() {
   const [touched, setTouched] = useState<AnswerKey[]>([])
   const [autoCleared, setAutoCleared] = useState(false)
   const [requestId] = useState(() => makeRequestId())
+  const [singleCell, setSingleCell] = useState<FastqFile[] | null>(null)
 
   /* ---------- inference ----------
      Derived, never stored: the questionnaire shows the user's answer once they
@@ -107,6 +111,8 @@ export default function App() {
     // `._Sample.R1.fastq.gz`, so it passes every FASTQ test we have and would
     // otherwise double the file count and halve the pairing.
     const real = incoming.filter(f => !isJunk(f.path))
+    // Aligner output (Cell Ranger, CeleScope) is a single-cell request, with its own questions.
+    if (detectDelivery(real) !== 'fastq') { setSingleCell(incoming); return }
     const fastq = real.filter(f => isFastq(f.name))
     const seen = new Set(files.map(f => f.path))
     const merged = [...files, ...fastq.filter(f => !seen.has(f.path))]
@@ -176,6 +182,8 @@ export default function App() {
     return null
   }
 
+  if (singleCell) return <ScApp incoming={singleCell} onExit={() => { setSingleCell(null); reset() }} />
+
   const blocker = blockerAt(step)
   const last = step === STEPS.length - 1
 
@@ -239,6 +247,7 @@ export default function App() {
               <StepFiles
                 files={files} other={other} skipped={skipped} scanned={scanned} pairing={pairing} samples={samples}
                 onIngest={ingest} onPairing={repair} onDemo={loadDemo} onReset={reset}
+                onScDemo={() => setSingleCell(scDemoFiles())}
               />
             )}
             {step === 1 && (
