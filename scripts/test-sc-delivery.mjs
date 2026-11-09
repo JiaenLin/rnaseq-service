@@ -179,8 +179,10 @@ console.log('\nRECOGNISED, NOT YET HANDLED: CELL RANGER MULTI')
   check('it is Cell Ranger output', () => detectDelivery(multi), 'cellranger')
   check('and is refused by name, not grouped into a library called "count"',
     () => /multi/.test(scanSingleCell(multi).unsupported ?? ''), true)
-  check('the refusal is what blocks step A',
-    () => deliveryBlocker('cellranger', [], scanSingleCell(multi).unsupported), scanSingleCell(multi).unsupported)
+  check('the refusal is what blocks step A', () => {
+    const why = scanSingleCell(multi).unsupported
+    return !!why && deliveryBlocker('cellranger', [], why) === why
+  }, true)
   check('the three handled layouts carry no such note',
     () => [crFlat, crOuts, celeNested].map(f => scanSingleCell(f).unsupported), [null, null, null])
 }
