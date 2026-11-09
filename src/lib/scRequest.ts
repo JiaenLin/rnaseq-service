@@ -1,10 +1,12 @@
 // The single-cell request: the questions, what may be pre-filled, what blocks Continue, and the JSON.
 //
 // The bulk request stays exactly as it was. It carries no `kind` field, so the bulk pipeline's intake
-// reads it unchanged. This one says `kind: "single-cell"` first, and its protocol fields carry the
-// names the single-cell QC samplesheet uses (assay, platform, chemistry, species,
+// reads it unchanged. This one says `kind: "single-cell"` first. Seven of its protocol fields carry the
+// names of the single-cell QC samplesheet's columns (assay, platform, species,
 // reference = <species>/<build>, mt_prefix, ribo_pattern, dbr), so that a later step can write that
-// sheet without translating anything.
+// sheet without translating anything. `chemistry` and `dbr_method` are the request's own: they are
+// not samplesheet columns and must never be copied into one, because the QC tool treats every column
+// it does not reserve as a candidate design factor.
 //
 // What may be pre-filled, and why so little:
 //   assay        NEVER. A cell and a nucleus get different mitochondrial bounds and a different
@@ -188,7 +190,7 @@ export interface ScRequest {
   protocol: {
     assay: Assay
     platform: Platform
-    /** null: not stated; the processor records it per library, and it can differ between libraries. */
+    /** Request only, never a samplesheet column. null: not stated; the processor records it per library. */
     chemistry: string | null
     species: string
     /** `<species>/<build>`, or null when the customer is not sure. */
@@ -197,7 +199,8 @@ export interface ScRequest {
     ribo_pattern: string
     /** A fraction, as the doublet caller takes it (8 % is 0.08); null when it is to be derived. */
     dbr: number | null
-    /** `derive`: per library, from the chemistry's multiplet rate and the aligner's cell count. */
+    /** Request only, never a samplesheet column. `derive`: per library, from the chemistry's
+     *  multiplet rate and the aligner's cell count. */
     dbr_method: 'stated' | 'derive'
   }
   /** Who gave each answer: the customer, or the file names. */

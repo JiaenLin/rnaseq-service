@@ -132,10 +132,12 @@ WT_1,Control,run/WT_1/WT_1_S1_L001_R1_001.fastq.gz,run/WT_1/WT_1_S1_L001_R2_001.
 ```
 
 **`scrnaseq-request-<id>.json`** is the single-cell request. It begins `"kind": "single-cell"` and lists
-each library's raw and filtered matrices and summary files. The protocol uses the field names of the
-single-cell QC samplesheet: `assay`, `platform`, `chemistry`, `species`, `reference` (written
-`<species>/<build>`), `mt_prefix`, `ribo_pattern`, and `dbr` with `dbr_method`. `answered_by` records,
-for each field, whether you gave it or it was read from your file names.
+each library's raw and filtered matrices and summary files. Seven protocol fields carry the names of
+the single-cell QC samplesheet's columns: `assay`, `platform`, `species`, `reference` (written
+`<species>/<build>`), `mt_prefix`, `ribo_pattern` and `dbr`. **`chemistry` and `dbr_method` belong to
+the request only. They are not samplesheet columns and must never be copied into one:** the QC tool
+treats every column it does not reserve as a candidate design factor. `answered_by` records, for each
+field, whether you gave it or it was read from your file names.
 [`scripts/fixtures/sc-request.json`](scripts/fixtures/sc-request.json) is a complete example. A bulk
 request carries no `kind` field and is unchanged.
 
