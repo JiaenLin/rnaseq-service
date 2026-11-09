@@ -52,7 +52,7 @@ export default function StepRequest(p: Props) {
         <div className="grid gap-3.5 sm:grid-cols-2">
           <Field label="Your name" value={c.name} placeholder="Jane Doe" required onChange={v => p.onContact('name', v)} />
           <Field label="Email" type="email" value={c.email} placeholder="jane@university.edu" required onChange={v => p.onContact('email', v)} />
-          <Field label="Institution / company" value={c.org} placeholder="Duke-NUS Medical School" onChange={v => p.onContact('org', v)} />
+          <Field label="Institution / company" value={c.org} placeholder="Your institute" onChange={v => p.onContact('org', v)} />
           <Field label="Project title" value={c.project} placeholder="NR4A2 knockout in microglia" onChange={v => p.onContact('project', v)} />
         </div>
       </div>

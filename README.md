@@ -34,7 +34,7 @@ Sample_R1.fq.gz                   most core facilities
 Sample-R1.fq.gz                   hyphenated variant
 Sample.R1.raw.fastq.gz            MGI / DNBSEQ-T7
 V350012345_L01_read_1.fq.gz       MGI raw lane split
-Sample_1.clean.fq.gz              SRA / BGI / Novogene
+Sample_1.clean.fq.gz              SRA / BGI
 ```
 
 `.raw`, `.clean`, `.filtered`, `.trimmed` and the bcl2fastq `_001` chunk index are
