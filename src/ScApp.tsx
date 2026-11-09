@@ -1,4 +1,4 @@
-// The single-cell request: the same four steps as the bulk one, for a delivery of aligner output
+// The single-cell request: the bulk one's four steps and a design step (U), for a delivery of aligner output
 // (Cell Ranger or CeleScope) rather than reads. App.tsx hands over here when `detectDelivery` finds
 // one. The page frame below repeats App.tsx's on purpose: the bulk app is left as it was.
 import { useMemo, useState } from 'react'
@@ -8,15 +8,19 @@ import { makeRequestId } from './lib/request'
 import { deliveryBlocker, scanSingleCell } from './lib/scDelivery'
 import { EMPTY_SC_ANSWERS, inferScAnswers, libraryNameBlocker, scQuestionBlocker } from './lib/scRequest'
 import type { ScAnswerKey, ScAnswers, ScInferences } from './lib/scRequest'
+import { EMPTY_SC_DESIGN, designBlocker } from './lib/scDesign'
+import type { ScDesignAnswers } from './lib/scDesign'
 import ScStepFiles from './components/ScStepFiles'
 import ScStepSamples from './components/ScStepSamples'
 import ScStepDesign from './components/ScStepDesign'
+import ScStepFactors from './components/ScStepFactors'
 import ScStepRequest from './components/ScStepRequest'
 
 const STEPS = [
   { base: 'A', label: 'Delivery', sub: 'scan' },
   { base: 'C', label: 'Name libraries', sub: 'label' },
   { base: 'G', label: 'Single-cell questions', sub: 'answer' },
+  { base: 'U', label: 'Design', sub: 'factors' },
   { base: 'T', label: 'Review & send', sub: 'submit' },
 ] as const
 
@@ -30,6 +34,7 @@ export default function ScApp({ incoming, onExit }: { incoming: FastqFile[]; onE
   const [names, setNames] = useState<Record<string, string>>({})
   const [answers, setAnswers] = useState<ScAnswers>(EMPTY_SC_ANSWERS)
   const [touched, setTouched] = useState<ScAnswerKey[]>([])
+  const [design, setDesign] = useState<ScDesignAnswers>(EMPTY_SC_DESIGN)
   const [contact, setContact] = useState<Contact>(EMPTY_CONTACT)
   const [requestId] = useState(() => makeRequestId())
 
@@ -71,7 +76,8 @@ export default function ScApp({ incoming, onExit }: { incoming: FastqFile[]; onE
     if (i === 0) return deliveryBlocker(scan.kind, libraries, scan.unsupported)
     if (i === 1) return libraryNameBlocker(libraries.map(l => l.name))
     if (i === 2) return scQuestionBlocker(eff, libraries)
-    if (i === 3) {
+    if (i === 3) return designBlocker(design, libraries)
+    if (i === 4) {
       if (!contact.name.trim()) return 'Add your name.'
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(contact.email)) return 'Add a valid email address.'
       if (!contact.turnaround) return 'Choose a turnaround.'
@@ -110,7 +116,7 @@ export default function ScApp({ incoming, onExit }: { incoming: FastqFile[]; onE
       <div className="mx-auto grid max-w-[1180px] gap-8 px-5 pb-24 pt-7 md:grid-cols-[236px_1fr]">
         <nav className="flex gap-2 self-start overflow-x-auto md:sticky md:top-[88px] md:flex-col md:gap-0.5">
           <div className="hidden px-2 pb-2.5 font-mono text-[10.5px] uppercase tracking-[0.12em] md:block" style={{ color: 'var(--ink-3)' }}>
-            Single-cell · 4 steps
+            Single-cell · 5 steps
           </div>
           {STEPS.map((s, i) => {
             const done = i < step && !blockerAt(i)
@@ -154,10 +160,11 @@ export default function ScApp({ incoming, onExit }: { incoming: FastqFile[]; onE
                 onAnswer={setAnswer} onQuestion={v => setAnswers(a => ({ ...a, question: v }))}
               />
             )}
-            {step === 3 && (
+            {step === 3 && <ScStepFactors design={design} libraries={libraries} onChange={setDesign} />}
+            {step === 4 && (
               <ScStepRequest
                 requestId={requestId} scan={scan} libraries={libraries} answers={eff} inferred={liveInf}
-                contact={contact} onContact={(k, v) => setContact(c => ({ ...c, [k]: v }))}
+                design={design} contact={contact} onContact={(k, v) => setContact(c => ({ ...c, [k]: v }))}
               />
             )}
           </section>

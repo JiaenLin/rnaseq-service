@@ -83,10 +83,9 @@ export default function ScStepSamples({ libraries, onName, onNames }: Props) {
       )}
 
       <div className="note">
-        <b>Groups and factors are not asked here yet.</b> A single-cell design can have several
-        factors, with a reference level for each, and this form does not record one yet. Describe the
-        comparison you want in the last question of the next step, and we will confirm the design with
-        you before anything runs.
+        <b>Groups and factors come later, in step U.</b> There each library gets one level of every
+        factor you name, and you choose each factor's reference level. They are keyed by the names you
+        give here.
       </div>
     </div>
   )

@@ -4,7 +4,10 @@ import { download } from '../lib/request'
 import { fmtSize } from '../lib/scan'
 import type { ScLibrary, ScScan } from '../lib/scDelivery'
 import type { ScAnswers, ScInferences } from '../lib/scRequest'
-import { SC_LABELS, buildScRequest, scRequestFilename, speciesKey } from '../lib/scRequest'
+import { SC_LABELS, scRequestFilename, speciesKey } from '../lib/scRequest'
+import type { ScDesignAnswers } from '../lib/scDesign'
+import { buildScRequestWithDesign, designFor } from '../lib/scDesign'
+import { buildDesignCsv, buildRegistryTsv, buildScSamplesheet, stage1Refusals } from '../lib/scSheets'
 import { Field, Mcq, SectionHead, StepHead } from './Ui'
 
 interface Props {
@@ -13,6 +16,7 @@ interface Props {
   libraries: (ScLibrary & { name: string })[]
   answers: ScAnswers
   inferred: ScInferences
+  design: ScDesignAnswers
   contact: Contact
   onContact: (k: keyof Contact, v: string | boolean) => void
 }
@@ -20,6 +24,10 @@ interface Props {
 export default function ScStepRequest(p: Props) {
   const { answers: a, contact: c } = p
   const [copied, setCopied] = useState(false)
+  const design = designFor(p.design, p.libraries)
+  const factors = design.factors
+    .map(f => `${f.name}: ${f.levels.map(l => (l === f.reference ? `${l} (reference)` : l)).join(', ')}`)
+    .join('  ×  ')
 
   const rows: [string, string][] = [
     ['delivery', `${p.libraries.length} librar${p.libraries.length === 1 ? 'y' : 'ies'} · ${p.scan.kind === 'cellranger' ? 'Cell Ranger' : 'CeleScope'} output · ${fmtSize(p.scan.bytes)}`],
@@ -32,12 +40,28 @@ export default function ScStepRequest(p: Props) {
     ['mitochondrial', a.mtPrefix.trim() || '—'],
     ['ribosomal', a.riboPattern.trim() || '—'],
     ['doublet rate', a.dbr === 'stated' ? `${a.dbrPercent.trim()} % for every library` : 'worked out per library'],
-    ['design', 'not asked yet: see the question below'],
+    ['design', p.design.compare === 'no' ? 'one group: nothing is compared' : factors || '—'],
+    ['covariates', design.covariates.join(', ') || 'none'],
     ['question', a.question || '—'],
   ]
 
-  const json = () => JSON.stringify(
-    buildScRequest(p.requestId, p.scan, p.libraries, a, p.inferred, c, new Date().toISOString()), null, 2)
+  const request = (createdISO: string) =>
+    buildScRequestWithDesign(p.requestId, p.scan, p.libraries, a, p.inferred, c, createdISO, p.design)
+  const json = () => JSON.stringify(request(new Date().toISOString()), null, 2)
+
+  // The analysis files are written from the same request. Every earlier step has let Continue, so it
+  // builds; what can still stop a file is an answer it needs, such as a reference left "not sure".
+  const built = (() => { try { return request('') } catch { return null } })()
+  const refusals = built ? stage1Refusals(built) : null
+  const files: [string, string, keyof NonNullable<typeof refusals>, () => string, string][] = [
+    ['QC samplesheet (.tsv)', `scrnaseq-samplesheet-${p.requestId}.tsv`, 'samplesheet',
+      () => buildScSamplesheet(request('')), 'text/tab-separated-values'],
+    ['Reference registry row (.tsv)', `scrnaseq-registry-${p.requestId}.tsv`, 'registry',
+      () => buildRegistryTsv(request('')), 'text/tab-separated-values'],
+    ['Design table (design.csv)', `scrnaseq-design-${p.requestId}.csv`, 'design',
+      () => buildDesignCsv(request('')), 'text/csv'],
+  ]
+  const stopped = refusals && (refusals.samplesheet ?? refusals.registry ?? refusals.design)
 
   return (
     <div className="space-y-6">
@@ -121,6 +145,22 @@ export default function ScStepRequest(p: Props) {
             setTimeout(() => setCopied(false), 1600)
           }}
         >{copied ? 'Copied' : 'Copy summary'}</button>
+      </div>
+
+      <div>
+        <SectionHead
+          title="The analysis files"
+          sub="Written from this request for the first analysis step: the quality-control samplesheet, its reference registry row, and the design table. Their paths are relative to the folder you dropped; we place them where your data lands."
+        />
+        <div className="flex flex-wrap gap-2.5">
+          {files.map(([title, name, key, text, type]) => (
+            <button
+              key={key} className="btn" disabled={!refusals || !!refusals[key]}
+              onClick={() => download(name, text(), type)}
+            >{title}</button>
+          ))}
+        </div>
+        {stopped && <div className="warnbox mt-3">{stopped}</div>}
       </div>
 
       <div className="note">

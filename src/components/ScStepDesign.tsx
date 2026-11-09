@@ -196,7 +196,7 @@ export default function ScStepDesign(p: Props) {
       <div>
         <SectionHead
           title="8 · What is the biological question?"
-          sub="One or two sentences, including the comparison you want: groups and factors are not asked separately yet."
+          sub="One or two sentences. The factors your libraries differ by, and their levels, are asked in the next step."
         />
         <textarea
           className="input min-h-[78px] resize-y leading-relaxed"

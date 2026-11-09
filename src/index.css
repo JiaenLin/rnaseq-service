@@ -26,6 +26,7 @@
   --accent-soft: #eef0ff;
   --A: #15803d; --C: #1d4ed8; --G: #b45309; --T: #b91c1c;
   --A-bg: #e7f6ec; --C-bg: #e8effd; --G-bg: #fdf1e0; --T-bg: #fdeaea;
+  --U: #7e22ce; --U-bg: #f3e8fd; /* uracil: the single-cell design step */
   --ok: #15803d; --ok-bg: #e7f6ec;
   --warn: #b45309; --warn-bg: #fdf1e0;
   --crit: #b91c1c; --crit-bg: #fdeaea;
@@ -47,6 +48,7 @@
     --accent-soft: #1b1f45;
     --A: #5cd68a; --C: #7aa7ff; --G: #f0b447; --T: #ff8a8a;
     --A-bg: #0f2a1b; --C-bg: #111f3d; --G-bg: #2c2110; --T-bg: #2e1517;
+    --U: #c99bff; --U-bg: #261538;
     --ok: #5cd68a; --ok-bg: #0f2a1b;
     --warn: #f0b447; --warn-bg: #2c2110;
     --crit: #ff8a8a; --crit-bg: #2e1517;
@@ -189,6 +191,7 @@ body {
   .base-c { background: var(--C-bg); color: var(--C); }
   .base-g { background: var(--G-bg); color: var(--G); }
   .base-t { background: var(--T-bg); color: var(--T); }
+  .base-u { background: var(--U-bg); color: var(--U); }
 
   .stat {
     background: var(--sunk);
