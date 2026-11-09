@@ -119,12 +119,17 @@ Questions 4 and 5 are held together, because the reference is written `<species>
 whose name says one organism (`GRCh38`, `hg19`; `GRCm39`, `mm10`; `mRatBN7.2`, `Rnor_6.0`, …) blocks
 Continue under another, so a build read from your paths cannot be kept when the organism is changed.
 A build that names no organism, or two (a barnyard reference), passes. A species typed under *Something
-else* is held the same way, and written with the same key, when it names human, mouse or rat: by its
-common name or binomial in any case or spacing (`Mouse`, `homo sapiens`), or by the binomial and one strain
-designation, a single word with a digit, `/` or `-` (`Mus musculus C57BL/6J`). Any other species stays in
-your own words and is not checked against the build: another organism (`Danio rerio`), or a mixture such
-as `humanized mouse` or `human xenograft in mouse`, which can be aligned to one organism's build. Only you
-know which, so a mixture is never mapped to one organism's key.
+else* is held the same way, and written with the same key, when it is human, mouse or rat by its common
+name or binomial in any case or spacing (`Mouse`, `homo sapiens`), alone or with one strain designation
+before or after it: a single word with a digit, `/` or `-`, brackets and commas aside
+(`Mus musculus C57BL/6J`, `C57BL/6 mouse`, `BALB/c mice`, `Mouse (C57BL/6)`). Anything else is written as
+you typed it and is not checked against the build:
+- a mixture, such as `humanized mouse`, `human xenograft in mouse`, `PDX in NSG mouse`, a chimera, or a
+  humanized strain (`hu-NSG`, `NSG-hIL15`). It can be aligned to one organism's build and only you know
+  which, so it is never mapped to one organism's key;
+- another animal whose name holds a listed one (`deer mouse`, `mouse lemur`, `naked mole-rat`,
+  `cotton rat`), or another organism (`Danio rerio`);
+- a looser phrasing of a listed organism, such as `human cells`, `M. musculus` or `Norway rat`.
 
 Values that need a file's contents are not read: cell counts, and the chemistry or build recorded
 inside the files. As for bulk, only names and sizes are read.

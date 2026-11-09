@@ -31,29 +31,38 @@ const NAMES: [string, string[]][] = [
   ['mus_musculus', ['mouse', 'mice', 'mus_musculus']],
   ['rattus_norvegicus', ['rat', 'rats', 'rattus_norvegicus']],
 ]
-// A strain designation holds a digit, "/" or "-" (C57BL/6J, BALB/c, Sprague-Dawley); a word naming an
-// organism or a graft makes the text a mixture instead.
+// A strain designation holds a digit, "/" or "-" (C57BL/6J, BALB/c, Sprague-Dawley, wild-type). A word
+// naming an organism or a graft, or carrying a humanized strain's mark (hu-NSG, Hu-PBL, huNSG, or a
+// human gene written h + its symbol, as in NSG-hIL15), makes the text a mixture instead.
 const STRAIN = /[0-9/-]/
 const MIXTURE = /human|homo|sapien|mouse|mice|muscul|rattus|norveg|xeno|graft|chimer|hybrid|pdx/i
+const HUMANIZED = /(^|[-_/.])([Hh]u-|hu[A-Z]|h[A-Z]{2})/
+const strainWord = (w: string) => STRAIN.test(w) && !MIXTURE.test(w) && !HUMANIZED.test(w)
+
+const keyOf = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
 
 /**
  * The listed organism a species typed by hand names, as its registry key, or null. It is read as one
- * when it is that organism's common name or binomial, in any case or spacing ("Mouse", " MICE ",
- * "homo  sapiens", "mus_musculus"), or the binomial followed by ONE strain designation: a single word
- * holding a digit, "/" or "-" and no organism or graft word ("Mus musculus C57BL/6J"). Anything else
- * stays the customer's own words: another organism ("Danio rerio"), a common name with more words
- * ("C57BL/6 mouse"), or a mixture ("humanized mouse", "human xenograft in mouse"), which is never
- * mapped to one organism's key.
+ * when it is that organism's common name or binomial in any case or spacing ("Mouse", " MICE ",
+ * "homo  sapiens", "mus_musculus"), alone or with ONE strain designation before or after it, brackets
+ * and commas aside ("Mus musculus C57BL/6J", "C57BL/6 mouse", "BALB/c mice", "Mouse (C57BL/6)").
+ * Anything else stays the customer's own words: a mixture ("humanized mouse", "human xenograft in
+ * mouse", "Mus musculus hu-NSG"), which is never mapped to one organism's key; another animal whose name
+ * holds a listed one ("deer mouse", "naked mole-rat"); another organism; or a looser phrasing of a
+ * listed one ("human cells", "M. musculus", "Norway rat").
  */
 export function listedSpecies(text: string): string | null {
-  const key = text.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
-  const named = NAMES.find(([, names]) => names.includes(key))
+  const named = NAMES.find(([, names]) => names.includes(keyOf(text)))
   if (named) return named[0]
-  const words = text.trim().split(/\s+/)
-  if (words.length !== 3) return null
-  const binomial = words.slice(0, 2).map(w => w.toLowerCase().replace(/[^a-z0-9]/g, '')).join('_')
-  const listed = NAMES.find(([species]) => species === binomial)
-  return listed && STRAIN.test(words[2]) && !MIXTURE.test(words[2]) ? listed[0] : null
+  const words = text.trim().split(/[\s,;]+/).filter(Boolean)
+  if (words.length < 2) return null
+  for (const i of [0, words.length - 1]) {
+    if (!strainWord(words[i].replace(/^[([]+|[)\]]+$/g, ''))) continue
+    const rest = keyOf(words.filter((_, j) => j !== i).join(' '))
+    const hit = NAMES.find(([, names]) => names.includes(rest))
+    if (hit) return hit[0]
+  }
+  return null
 }
 
 /** The organism a build's name says, as a registry key; null when it says none, or more than one. */

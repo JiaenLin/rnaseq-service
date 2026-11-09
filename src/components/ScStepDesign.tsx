@@ -137,8 +137,9 @@ export default function ScStepDesign(p: Props) {
               </p>
             ) : a.speciesOther.trim() && (
               <p className="mt-1.5 text-xs" style={{ color: 'var(--ink-3)' }}>
-                Written as <code className="font-mono">{speciesKey(a)}</code>. Only human, mouse and rat are checked
-                against the reference build; a mixture such as a xenograft stays in your words.
+                Written as <code className="font-mono">{speciesKey(a)}</code>, and not checked against the reference
+                build: only human, mouse or rat named plainly (by name or binomial, with at most one strain) are. A
+                mixture such as a xenograft stays in your words.
               </p>
             )}
           </div>

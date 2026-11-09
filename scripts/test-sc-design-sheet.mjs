@@ -433,11 +433,28 @@ check('a species in the customer\'s own words is theirs (a xenograft may be alig
     /question 5/.test(scQuestionBlocker(typed('Mus musculus C57BL/6J'), libs()) ?? ''),
     viaJson(request(mouse(typed('Mus musculus C57BL/6J', 'GRCm39')))).protocol.reference,
   ], ['mus_musculus', true, 'mus_musculus/GRCm39'])
-  check('another organism, or a mixture, stays in the customer\'s words and is not held to the build', () =>
-    ['Danio rerio', 'human xenograft in mouse', 'humanized mouse', 'C57BL/6 mouse', 'Mus musculus humanized-liver'].map(t =>
-      [listedSpecies(t), scQuestionBlocker(typed(t), libs()), buildRegistryRow(viaJson(request(typed(t)))).split('\t')[0]]),
-  [[null, null, 'danio_rerio'], [null, null, 'human_xenograft_in_mouse'], [null, null, 'humanized_mouse'],
-    [null, null, 'c57bl_6_mouse'], [null, null, 'mus_musculus_humanized_liver']])
+  // The strain allowance holds on either side of a common name too, brackets and commas aside.
+  const strainForms = ['C57BL/6 mouse', 'C57BL/6J mice', 'BALB/c mice', 'Mouse (C57BL/6)', 'mouse C57BL/6', 'mouse, C57BL/6J', 'wild-type mouse']
+  check('a common name with one strain designation, before or after it, is that organism: blocked over a human build', () =>
+    strainForms.map(t => [listedSpecies(t), /question 5/.test(scQuestionBlocker(typed(t), libs()) ?? '')]),
+  strainForms.map(() => ['mus_musculus', true]))
+  check('C34\'s own scenario: "Something else: C57BL/6 mouse" over the detected GRCh38-2024-A writes nothing; over GRCm39, mus_musculus', () => [
+    /question 5/.test(refusal(() => request(mouse(typed('C57BL/6 mouse')), DESIGN(), libs(), crFiles, kept()))),
+    viaJson(request(mouse(typed('C57BL/6 mouse', 'GRCm39')))).protocol.reference,
+  ], [true, 'mus_musculus/GRCm39'])
+  // What stays in the customer's words, written as typed and not checked against the build: mixtures,
+  // other animals whose names hold a listed one, other organisms, and looser phrasings of a listed one.
+  const unchecked = [
+    ['humanized mouse'], ['human xenograft in mouse'], ['PDX in NSG mouse'], ['mouse-human chimera'],
+    ['Mus musculus humanized-liver'], ['Mus musculus hu-NSG'], ['Mus musculus Hu-PBL'], ['Mus musculus NSG-hIL15'],
+    ['deer mouse'], ['mouse lemur'], ['naked mole-rat'], ['spiny mouse'], ['cotton rat'], ['kangaroo rat'], ['Danio rerio'],
+    ['human cells', 'GRCm39'], ['M. musculus'], ['Norway rat'],
+  ]
+  const asTyped = t => t.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
+  check('mixtures, other animals and looser phrasings stay in the customer\'s words, unchecked against the build', () =>
+    unchecked.map(([t, build]) => [t, listedSpecies(t), scQuestionBlocker(typed(t, build), libs()),
+      buildRegistryRow(viaJson(request(typed(t, build)))).split('\t')[0]]),
+  unchecked.map(([t]) => [t, null, null, asTyped(t)]))
 }
 
 console.log('\nNOTHING IS UPLOADED')
