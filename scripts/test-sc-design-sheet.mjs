@@ -29,7 +29,7 @@ const {
   SCQC_COMMIT, SAMPLESHEET_COLUMNS, RESERVED_COLUMNS, REQUEST_ONLY, REGISTRY_COLUMNS, ALIGNER_CELLS_REQUIRED_FOR,
   buildScSamplesheet, buildRegistryRow, buildRegistryTsv, buildDesignCsv, stage1Refusals,
 } = await load('../src/lib/scSheets.ts')
-const { buildSpecies } = await load('../src/lib/scReference.ts')
+const { buildSpecies, listedSpecies } = await load('../src/lib/scReference.ts')
 
 let failed = 0
 // `got` is a thunk, so that a missing function or a throw is one failed check, not a crash.
@@ -403,6 +403,42 @@ check('a known species written out by hand is held to the build too', () => /que
 check('a species in the customer\'s own words is theirs (a xenograft may be aligned to one organism\'s build)', () =>
   buildRegistryRow(viaJson(request({ ...FULL(), species: 'other', speciesOther: 'Xenopus laevis' }))).split('\t').slice(0, 2),
 ['xenopus_laevis', 'GRCh38-2024-A'])
+{
+  // A listed organism typed under "Something else" is held, and written, exactly as its button is.
+  const typed = (speciesOther, referenceName = 'GRCh38-2024-A') => ({ ...FULL(), species: 'other', speciesOther, referenceName })
+  const mouse = a => ({ ...a, mtPrefix: 'mt-', riboPattern: '^Rp[sl]' })
+  const kept = () => { const rest = inferScAnswers(scan(), crFiles); delete rest.species; return rest }
+  check('"Something else: Mouse" over the detected human build: blocked at question 5; no request, no samplesheet', () => {
+    const m = scQuestionBlocker(mouse(typed('Mouse')), libs()) ?? ''
+    const edited = req()
+    edited.protocol.species = 'mouse'
+    edited.protocol.reference = 'mouse/GRCh38-2024-A'
+    return [/question 5/.test(m), /human/.test(m), /question 5/.test(refusal(() => request(mouse(typed('Mouse')), DESIGN(), libs(), crFiles, kept()))),
+      /human/.test(refusal(() => buildScSamplesheet(edited)))]
+  }, [true, true, true, true])
+  check('a listed organism typed in any case or spacing is read as its registry key', () =>
+    ['Mouse', ' MICE ', 'homo  sapiens', 'Rattus Norvegicus', 'HUMAN', 'mus_musculus', 'rats'].map(t => listedSpecies(t)),
+  ['mus_musculus', 'mus_musculus', 'homo_sapiens', 'rattus_norvegicus', 'homo_sapiens', 'mus_musculus', 'rattus_norvegicus'])
+  check('typed "human" over GRCm39 and "rat" over GRCh38 are blocked at question 5, as their buttons are', () => [
+    /question 5/.test(scQuestionBlocker(typed('human', 'GRCm39'), libs()) ?? ''),
+    /question 5/.test(scQuestionBlocker(typed('rat', 'GRCh38'), libs()) ?? ''),
+  ], [true, true])
+  check('and written as the button writes it: "Something else: Mouse" over GRCm39 gives mus_musculus/GRCm39', () => {
+    const hand = viaJson(request(mouse(typed('Mouse', 'GRCm39'))))
+    const button = viaJson(request(mouse({ ...FULL(), species: 'mouse', referenceName: 'GRCm39' })))
+    return [hand.protocol.species, hand.protocol.reference, buildRegistryRow(hand) === buildRegistryRow(button)]
+  }, ['mus_musculus', 'mus_musculus/GRCm39', true])
+  check('a binomial with one strain designation is that organism: "Mus musculus C57BL/6J" blocked over GRCh38, mouse over GRCm39', () => [
+    listedSpecies('Mus musculus C57BL/6J'),
+    /question 5/.test(scQuestionBlocker(typed('Mus musculus C57BL/6J'), libs()) ?? ''),
+    viaJson(request(mouse(typed('Mus musculus C57BL/6J', 'GRCm39')))).protocol.reference,
+  ], ['mus_musculus', true, 'mus_musculus/GRCm39'])
+  check('another organism, or a mixture, stays in the customer\'s words and is not held to the build', () =>
+    ['Danio rerio', 'human xenograft in mouse', 'humanized mouse', 'C57BL/6 mouse', 'Mus musculus humanized-liver'].map(t =>
+      [listedSpecies(t), scQuestionBlocker(typed(t), libs()), buildRegistryRow(viaJson(request(typed(t)))).split('\t')[0]]),
+  [[null, null, 'danio_rerio'], [null, null, 'human_xenograft_in_mouse'], [null, null, 'humanized_mouse'],
+    [null, null, 'c57bl_6_mouse'], [null, null, 'mus_musculus_humanized_liver']])
+}
 
 console.log('\nNOTHING IS UPLOADED')
 check('the request and its three files are written with no network call (fetch throws if called)', () => {

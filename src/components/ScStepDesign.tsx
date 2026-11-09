@@ -1,7 +1,8 @@
 import type { DeliveryKind, ScLibrary } from '../lib/scDelivery'
 import { hasMatrix } from '../lib/scDelivery'
 import type { ScAnswerKey, ScAnswers, ScInferences } from '../lib/scRequest'
-import { SC_LABELS, mtRiboSuggestion } from '../lib/scRequest'
+import { SC_LABELS, mtRiboSuggestion, speciesKey } from '../lib/scRequest'
+import { listedSpecies, speciesWord } from '../lib/scReference'
 import { Field, Mcq, SectionHead, StepHead } from './Ui'
 
 interface Props {
@@ -22,6 +23,7 @@ export default function ScStepDesign(p: Props) {
   const suggestion = mtRiboSuggestion(a.species)
   const expected = LAYOUT_PLATFORM[p.kind]
   const dbr = Number(a.dbrPercent)
+  const listed = a.species === 'other' ? listedSpecies(a.speciesOther) : null
 
   return (
     <div className="space-y-6">
@@ -128,6 +130,17 @@ export default function ScStepDesign(p: Props) {
           <div className="mt-3 max-w-sm">
             <Field label="Species name" value={a.speciesOther} placeholder="e.g. Danio rerio" required
               onChange={v => p.onAnswer('speciesOther', v)} />
+            {listed ? (
+              <p className="mt-1.5 text-xs" style={{ color: 'var(--ink-3)' }}>
+                Read as {speciesWord(listed)} (<code className="font-mono">{listed}</code>): checked against the reference
+                exactly as the {speciesWord(listed)} button is.
+              </p>
+            ) : a.speciesOther.trim() && (
+              <p className="mt-1.5 text-xs" style={{ color: 'var(--ink-3)' }}>
+                Written as <code className="font-mono">{speciesKey(a)}</code>. Only human, mouse and rat are checked
+                against the reference build; a mixture such as a xenograft stays in your words.
+              </p>
+            )}
           </div>
         )}
       </div>

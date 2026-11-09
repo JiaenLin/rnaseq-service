@@ -118,8 +118,13 @@ share, which this request cannot express yet.
 Questions 4 and 5 are held together, because the reference is written `<species>/<build>`: a build
 whose name says one organism (`GRCh38`, `hg19`; `GRCm39`, `mm10`; `mRatBN7.2`, `Rnor_6.0`, …) blocks
 Continue under another, so a build read from your paths cannot be kept when the organism is changed.
-A build that names no organism, or two (a barnyard reference), passes, and so does a species you write
-in your own words: a xenograft can be aligned to one organism's build.
+A build that names no organism, or two (a barnyard reference), passes. A species typed under *Something
+else* is held the same way, and written with the same key, when it names human, mouse or rat: by its
+common name or binomial in any case or spacing (`Mouse`, `homo sapiens`), or by the binomial and one strain
+designation, a single word with a digit, `/` or `-` (`Mus musculus C57BL/6J`). Any other species stays in
+your own words and is not checked against the build: another organism (`Danio rerio`), or a mixture such
+as `humanized mouse` or `human xenograft in mouse`, which can be aligned to one organism's build. Only you
+know which, so a mixture is never mapped to one organism's key.
 
 Values that need a file's contents are not read: cell counts, and the chemistry or build recorded
 inside the files. As for bulk, only names and sizes are read.

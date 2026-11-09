@@ -25,7 +25,7 @@ import type { Contact, FastqFile, Inference } from '../types'
 import { findToken, inferFromScan } from './infer.ts'
 import type { DeliveryKind, ScLibrary, ScMatrix, ScScan } from './scDelivery.ts'
 import { deliveryBlocker, hasMatrix } from './scDelivery.ts'
-import { referenceSpeciesBlocker } from './scReference.ts'
+import { listedSpecies, referenceSpeciesBlocker } from './scReference.ts'
 
 export type Assay = 'scrna' | 'snrna'
 export type Platform = '10x' | 'singleron'
@@ -106,10 +106,14 @@ export const mtRiboSuggestion = (species: string) =>
 
 const SPECIES_KEY: Record<string, string> = { human: 'homo_sapiens', mouse: 'mus_musculus', rat: 'rattus_norvegicus' }
 
-/** The organism as the reference registry spells it: `homo_sapiens`, or the named species as a key. */
+/**
+ * The organism as the reference registry spells it: `homo_sapiens`, or the named species as a key. A
+ * listed organism typed under "Something else" gets its button's key (scReference.ts, listedSpecies).
+ */
 export function speciesKey(a: ScAnswers): string {
   if (a.species === 'other')
-    return a.speciesOther.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
+    return listedSpecies(a.speciesOther) ??
+      a.speciesOther.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
   return SPECIES_KEY[a.species] ?? ''
 }
 
