@@ -1,11 +1,15 @@
 // The single-cell request: its questions, what blocks Continue, and the JSON it writes.
 // Runs the real src/lib/scRequest.ts and src/lib/scDelivery.ts via Node's TypeScript type-stripping.
 //
+// scripts/fixtures/sc-request.json is the request this file builds, kept whole as the contract a
+// consumer of single-cell requests is written against. When the request changes ON PURPOSE, rewrite it
+// with `node scripts/test-sc-request.mjs --update-fixture` and say so in the commit.
+//
 // It also guards the bulk path: the built-in demo, dropped as a folder, must still route to the bulk
 // questionnaire and produce the bulk request a42b747 produced, byte for byte
 // (scripts/bulk-demo-request.mjs says how that fixture was written).
 import { createHash } from 'node:crypto'
-import { readFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { demoFiles } from '../src/lib/demo.ts'
 import { bulkDemoRequestJson } from './bulk-demo-request.mjs'
@@ -30,7 +34,8 @@ const check = (name, got, want) => {
   if (!ok) failed++
   console.log(`${ok ? '  ok  ' : '  FAIL'} ${name}${ok ? '' : `\n        got ${JSON.stringify(value)}\n        want ${JSON.stringify(want)}`}`)
 }
-const fixture = name => readFileSync(fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url)), 'utf8')
+const fixturePath = name => fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url))
+const fixture = name => readFileSync(fixturePath(name), 'utf8')
 
 const MB = 1e6
 const at = (dir, rels, size = MB) => rels.map(r => ({ name: r.split('/').pop(), path: `${dir}/${r}`, size }))
@@ -179,6 +184,7 @@ console.log('\nTHE REQUEST')
   check('a repeated library name is refused', () => /unique/i.test((() => {
     try { return JSON.stringify(build(FULL(), {}, named(crScan(), { [`${ROOT}/S2`]: 'S1' }))) } catch (e) { return e.message }
   })()), true)
+  if (process.argv.includes('--update-fixture')) writeFileSync(fixturePath('sc-request.json'), JSON.stringify(req(), null, 2))
   check('the whole request, byte for byte (scripts/fixtures/sc-request.json)',
     () => JSON.stringify(req(), null, 2) === fixture('sc-request.json'), true)
 }
