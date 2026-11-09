@@ -72,6 +72,10 @@ export default function ScStepFiles(p: Props) {
         />
       </div>
 
+      {p.scan.unsupported && (
+        <div className="warnbox"><b>Not handled yet.</b> {p.scan.unsupported}</div>
+      )}
+
       <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
         <Stat k="Libraries" v={p.libraries.length} />
         <Stat k="Aligner" v={aligner} sub={p.scan.kind === 'cellranger' ? '10x' : 'Singleron'} />

@@ -215,7 +215,7 @@ export function buildScRequest(
   id: string, scan: ScScan, libraries: (ScLibrary & { name: string })[], a: ScAnswers,
   inferred: ScInferences, c: Contact, createdISO: string,
 ): ScRequest {
-  const refusal = deliveryBlocker(scan.kind, libraries)
+  const refusal = deliveryBlocker(scan.kind, libraries, scan.unsupported)
     ?? libraryNameBlocker(libraries.map(l => l.name))
     ?? scQuestionBlocker(a, libraries)
   if (refusal) throw new Error(refusal)

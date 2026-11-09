@@ -13,7 +13,7 @@ try {
 } catch (e) {
   console.log(`\n  (src/lib/scDelivery.ts did not load: ${e.code ?? e.message})`)
 }
-const { detectDelivery, scanSingleCell } = mod
+const { detectDelivery, scanSingleCell, deliveryBlocker } = mod
 
 let failed = 0
 // `got` is a thunk, so that a missing function or a throw is one failed check, not a crash.
@@ -166,6 +166,23 @@ console.log('\nIDENTITY AND BOOKKEEPING')
     [2, ['fastq/S1_S1_L001_R1_001.fastq.gz']])
 
   check('a FASTQ delivery gives no libraries', () => scanSingleCell(demoFiles()).libraries, [])
+}
+
+console.log('\nRECOGNISED, NOT YET HANDLED: CELL RANGER MULTI')
+{
+  // One raw matrix per GEM well, shared by its samples; each sample's own under per_sample_outs/.
+  const multi = [
+    ...at('run/G1/outs/multi/count', ['raw_feature_bc_matrix.h5', ...TRIPLET.map(f => `raw_feature_bc_matrix/${f}`)]),
+    ...['S1', 'S2'].flatMap(s => at(`run/G1/outs/per_sample_outs/${s}`,
+      ['count/sample_filtered_feature_bc_matrix.h5', 'web_summary.html'])),
+  ]
+  check('it is Cell Ranger output', () => detectDelivery(multi), 'cellranger')
+  check('and is refused by name, not grouped into a library called "count"',
+    () => /multi/.test(scanSingleCell(multi).unsupported ?? ''), true)
+  check('the refusal is what blocks step A',
+    () => deliveryBlocker('cellranger', [], scanSingleCell(multi).unsupported), scanSingleCell(multi).unsupported)
+  check('the three handled layouts carry no such note',
+    () => [crFlat, crOuts, celeNested].map(f => scanSingleCell(f).unsupported), [null, null, null])
 }
 
 console.log(failed ? `\n${failed} test(s) failed\n` : '\nAll single-cell delivery tests passed\n')

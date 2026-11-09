@@ -56,6 +56,8 @@ export interface ScScan {
   skipped: number
   n_files: number
   bytes: number
+  /** Why this delivery cannot become a request yet: a layout recognised, but not handled. */
+  unsupported: string | null
 }
 
 export const hasMatrix = (m: ScMatrix) => !!(m.matrix_dir || m.h5)
@@ -158,8 +160,14 @@ export function scanSingleCell(files: FastqFile[]): ScScan {
   const kind = detectDelivery(kept)
   const scan: ScScan = {
     kind, libraries: [], other: [], skipped: files.length - kept.length,
-    n_files: kept.length, bytes: kept.reduce((a, f) => a + f.size, 0),
+    n_files: kept.length, bytes: kept.reduce((a, f) => a + f.size, 0), unsupported: null,
   }
+  // Cell Ranger multi writes one raw matrix per GEM well, shared by every sample in it, and each
+  // sample's own matrix under per_sample_outs/. Grouped by folder it would read as one library
+  // called "count"; refusing by name is better than a request that is quietly wrong.
+  if (kind === 'cellranger' && kept.some(f => f.path.split('/').includes('per_sample_outs')))
+    scan.unsupported = 'This is Cell Ranger multi output (per_sample_outs/), which this request does not ' +
+      'handle yet: its raw matrix is shared by every sample of a GEM well.'
   if (kind === 'fastq') {
     scan.other = kept.map(f => f.path).sort(byPath)
     return scan
@@ -244,7 +252,10 @@ export function scanSingleCell(files: FastqFile[]): ScScan {
  * Why step A cannot continue, or null. Every library needs its raw matrix: quality control starts
  * from every droplet, and a delivery without them cannot be analysed from the matrices at all.
  */
-export function deliveryBlocker(kind: DeliveryKind, libraries: { name: string; raw: ScMatrix }[]): string | null {
+export function deliveryBlocker(
+  kind: DeliveryKind, libraries: { name: string; raw: ScMatrix }[], unsupported: string | null = null,
+): string | null {
+  if (unsupported) return unsupported
   if (kind === 'fastq' || !libraries.length) return 'No single-cell library found in that folder.'
   const missing = libraries.filter(l => !hasMatrix(l.raw)).map(l => `“${l.name}”`)
   if (!missing.length) return null

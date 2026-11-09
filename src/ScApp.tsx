@@ -68,7 +68,7 @@ export default function ScApp({ incoming, onExit }: { incoming: FastqFile[]; onE
 
   /* ---------- gating ---------- */
   const blockerAt = (i: number): string | null => {
-    if (i === 0) return deliveryBlocker(scan.kind, libraries)
+    if (i === 0) return deliveryBlocker(scan.kind, libraries, scan.unsupported)
     if (i === 1) return libraryNameBlocker(libraries.map(l => l.name))
     if (i === 2) return scQuestionBlocker(eff, libraries)
     if (i === 3) {
