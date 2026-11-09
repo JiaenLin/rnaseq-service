@@ -175,6 +175,26 @@ console.log('\nTHE REQUEST')
     assay: 'user', platform: 'detected', chemistry: 'user', species: 'user', reference: 'user',
     mt_prefix: 'user', ribo_pattern: 'user', dbr: 'user',
   })
+  {
+    // Who answered the reference: it takes two keys, the choice and the build, and only an answer
+    // whose every key is still the file names' is "detected".
+    const inf = () => inferScAnswers(crScan(), crFiles)
+    const untouched = () => ({ ...inf() })
+    check('untouched, the file names answered organism and reference', () => {
+      const r = build(FULL(), untouched())
+      return [r.answered_by.species, r.answered_by.reference]
+    }, ['detected', 'detected'])
+    check('a retyped build is the customer\'s answer', () => {
+      const { referenceName, ...rest } = untouched()
+      const r = build({ ...FULL(), referenceName: 'GRCh38-2020-A' }, rest)
+      return [r.protocol.reference, r.answered_by.reference, !!referenceName]
+    }, ['homo_sapiens/GRCh38-2020-A', 'user', true])
+    check('"Not sure" is the customer\'s answer too', () => {
+      const { reference, ...rest } = untouched()
+      const r = build({ ...FULL(), reference: 'unsure' }, rest)
+      return [r.protocol.reference, r.answered_by.reference, !!reference]
+    }, [null, 'user', true])
+  }
   check('each library under the name the customer gave it', () =>
     build(FULL(), {}, named(crScan(), { [`${ROOT}/S1`]: 'Ctrl_1' })).data.libraries.map(l => l.sample), ['Ctrl_1', 'S2'])
   check('with its matrices and summary', () => {

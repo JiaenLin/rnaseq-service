@@ -185,6 +185,23 @@ console.log('\nRECOGNISED, NOT YET HANDLED: CELL RANGER MULTI')
   }, true)
   check('the three handled layouts carry no such note',
     () => [crFlat, crOuts, celeNested].map(f => scanSingleCell(f).unsupported), [null, null, null])
+
+  // per_sample_outs/ on its own, without multi/count: still multi, never a FASTQ delivery.
+  const perSample = ['S1', 'S2'].flatMap(s => at(`run/G1/outs/per_sample_outs/${s}`, [
+    ...TRIPLET.map(f => `count/sample_filtered_feature_bc_matrix/${f}`), 'count/sample_filtered_feature_bc_matrix.h5',
+    'count/sample_raw_feature_bc_matrix.h5', 'web_summary.html']))
+  check('per_sample_outs/ alone is Cell Ranger output, refused by name',
+    () => [detectDelivery(perSample), /multi/.test(scanSingleCell(perSample).unsupported ?? '')], ['cellranger', true])
+  // A provider that flattened the per-sample folders: the matrices' own names still say multi.
+  const flatSample = at('delivery/S1', ['sample_filtered_feature_bc_matrix.h5', 'sample_raw_feature_bc_matrix.h5'])
+  check('sample_*_feature_bc_matrix outside per_sample_outs/ is refused the same way',
+    () => [detectDelivery(flatSample), /multi/.test(scanSingleCell(flatSample).unsupported ?? '')], ['cellranger', true])
+  // ...while an ordinary library that happens to be called sample_1 is just a library.
+  const sample1 = at('run/sample_1/outs', [...CR_DIRS, ...CR_H5])
+  check('a library named sample_1 still passes', () => {
+    const s = scanSingleCell(sample1)
+    return [s.kind, s.unsupported, s.libraries.map(l => l.label)]
+  }, ['cellranger', null, ['sample_1']])
 }
 
 console.log(failed ? `\n${failed} test(s) failed\n` : '\nAll single-cell delivery tests passed\n')
