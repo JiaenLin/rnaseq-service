@@ -13,8 +13,8 @@ then produces a request file and a pipeline-ready sample sheet. **Your files nev
 computer**: only names and sizes are read, and nothing is uploaded.
 
 A **single-cell delivery** (Cell Ranger or CeleScope output, the aligner's count matrices) is
-recognised too. It becomes a single-cell request with its own questions: see
-[Single-cell deliveries](#single-cell-deliveries).
+recognised too. It becomes a single-cell request with its own questions and its design, plus the files
+the analysis starts from: see [Single-cell deliveries](#single-cell-deliveries).
 
 ---
 
@@ -27,8 +27,8 @@ recognised too. It becomes a single-cell request with its own questions: see
 | **G** | Design & analysis | Multiple-choice questions about organism, library prep, strandedness, genome, control group, and deliverables — **pre-filled from what the scan detected** |
 | **T** | Review & send | Contact details, a spec-sheet summary, then download `request.json` + `samplesheet.csv` |
 
-A single-cell delivery goes through the same four steps: its libraries, their names, the single-cell
-questions, and the request.
+A single-cell delivery goes through the same steps and one more: its libraries, their names, the
+single-cell questions, its design (step **U**), and the request.
 
 ## Filename conventions understood
 
@@ -115,9 +115,28 @@ share, which this request cannot express yet.
 | 6 · Mitochondrial prefix and ribosomal pattern | Never. One click applies the human convention (`MT-`, `^RP[SL]`) or the mouse one (`mt-`, `^Rp[sl]`) |
 | 7 · Doublet rate | Never. Either it is worked out per library, or you state one percentage |
 
-Not asked yet: the experimental design (groups, factors, and the reference level of each). Question 8
-asks for the comparison in words instead. Values that need a file's contents are not read either: cell
-counts, and the chemistry or build recorded inside the files. As for bulk, only names and sizes are read.
+Questions 4 and 5 are held together, because the reference is written `<species>/<build>`: a build
+whose name says one organism (`GRCh38`, `hg19`; `GRCm39`, `mm10`; `mRatBN7.2`, `Rnor_6.0`, …) blocks
+Continue under another, so a build read from your paths cannot be kept when the organism is changed.
+A build that names no organism, or two (a barnyard reference), passes, and so does a species you write
+in your own words: a xenograft can be aligned to one organism's build.
+
+Values that need a file's contents are not read: cell counts, and the chemistry or build recorded
+inside the files. As for bulk, only names and sizes are read.
+
+**The design (step U).** Nothing in it is read from file names or filled in for you:
+- whether the libraries are compared at all (an atlas is one group);
+- each **factor**: its name, its levels, and its **reference level**, which every comparison of that
+  factor is measured against. It decides the sign of every change, so it has no default;
+- any **covariates** (a batch, a sequencing run, sex, age): recorded for every library and kept beside
+  the factors, but not compared;
+- one level of every factor and a value of every covariate for each library. Every level needs a
+  library.
+
+Names start with a letter and hold letters, digits and `_`, so that a model formula can carry them.
+They may not take the name of a QC samplesheet column (`sample`, `dbr`, `species`, …) or of a
+request-only field (`chemistry`, `dbr_method`). No comparison is listed: the analysis enumerates them
+from the table.
 
 ## Output
 
@@ -137,9 +156,27 @@ the single-cell QC samplesheet's columns: `assay`, `platform`, `species`, `refer
 `<species>/<build>`), `mt_prefix`, `ribo_pattern` and `dbr`. **`chemistry` and `dbr_method` belong to
 the request only. They are not samplesheet columns and must never be copied into one:** the QC tool
 treats every column it does not reserve as a candidate design factor. `answered_by` records, for each
-field, whether you gave it or it was read from your file names.
-[`scripts/fixtures/sc-request.json`](scripts/fixtures/sc-request.json) is a complete example. A bulk
-request carries no `kind` field and is unchanged.
+field, whether you gave it or it was read from your file names. Its `design` block holds the factors
+(each with its `levels` and its `reference`), the `covariates`, and a `table` with one row per library.
+[`scripts/fixtures/sc-request-design.json`](scripts/fixtures/sc-request-design.json) is a complete
+example. A bulk request carries no `kind` field and is unchanged.
+
+Step T also writes, from the same request, the three files the single-cell analysis starts from. Their
+paths are relative to the folder you dropped, so whoever runs the analysis places them where the data lands:
+
+- **`scrnaseq-samplesheet-<id>.tsv`**, the QC samplesheet, tab-separated: `sample`, `platform`,
+  `species`, `reference`, `assay`, `matrix` (the raw matrix folder, else its `.h5`), `aligner_cells`
+  (the filtered matrix folder, else its `.h5`), `mt_prefix`, `ribo_pattern`, `dbr` (blank when it is to
+  be worked out per library), then the factors and the covariates. It never carries `chemistry`,
+  `dbr_method` or `dbr_sd`;
+- **`scrnaseq-registry-<id>.tsv`**, the reference registry with this request's row, keyed
+  `<species>/<build>`. Its index path is `-`: matrices were delivered, so nothing is aligned;
+- **`scrnaseq-design-<id>.csv`**, the design table (`design.csv`): keyed on `sample`, the factors then the
+  covariates.
+
+A reference left *Not sure* holds back the samplesheet and the registry row, which need it. The golden
+files in [`scripts/fixtures/`](scripts/fixtures/) (`sc-samplesheet.tsv`, `sc-registry.tsv`,
+`sc-design.csv`) show each one for a 2×2 design.
 
 ---
 
@@ -158,7 +195,7 @@ Three tools, one workflow — each usable on its own:
 ```bash
 npm install
 npm run dev       # http://localhost:5173
-npm test          # regression tests: FASTQ scan, inference, groups, single-cell delivery and request
+npm test          # regression tests: FASTQ scan, inference, groups, single-cell delivery, request and design
 npm run build && npm run preview
 ```
 
@@ -167,6 +204,11 @@ before single-cell deliveries were recognised
 ([`scripts/fixtures/bulk-demo-request.json`](scripts/fixtures/bulk-demo-request.json)). If you change
 the bulk request on purpose, [`scripts/bulk-demo-request.mjs`](scripts/bulk-demo-request.mjs) says
 how to regenerate the fixture.
+
+The single-cell files are checked against the QC tool's own column lists, copied with their commit into
+[`scripts/fixtures/scqc-contract.json`](scripts/fixtures/scqc-contract.json) by
+[`scripts/scqc-contract.mjs`](scripts/scqc-contract.mjs). When the QC tool changes, regenerate that copy
+from its checkout; `npm test` then names whatever the writers must follow.
 
 Stack: React + TypeScript + Vite + Tailwind. No backend, and no runtime dependencies beyond React.
 

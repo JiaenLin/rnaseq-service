@@ -30,6 +30,9 @@ dist-ssr
 *.fq.gz
 rnaseq-request-*.json
 scrnaseq-request-*.json
+scrnaseq-samplesheet-*.tsv
+scrnaseq-registry-*.tsv
+scrnaseq-design-*.csv
 samplesheet-*.csv
 *.h5
 *.mtx
