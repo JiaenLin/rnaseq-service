@@ -1,0 +1,154 @@
+{
+  "request_id": "RUOHS00",
+  "created": "2026-01-01T00:00:00.000Z",
+  "contact": {
+    "name": "Jane Doe",
+    "email": "jane@example.org",
+    "org": "Example University",
+    "project": "Demo request",
+    "turnaround": "standard",
+    "notes": ""
+  },
+  "data": {
+    "n_fastq": 12,
+    "total_bytes": 27354000000,
+    "layout": "paired",
+    "samples": [
+      {
+        "sample": "KO_1",
+        "condition": "Treated",
+        "files": [
+          {
+            "file": "KO_1_S4_L001_R1_001.fastq.gz",
+            "path": "250312_NovaSeq_Mouse_Brain_mRNAseq/KO_1/KO_1_S4_L001_R1_001.fastq.gz",
+            "read": 1,
+            "bytes": 2313000000
+          },
+          {
+            "file": "KO_1_S4_L001_R2_001.fastq.gz",
+            "path": "250312_NovaSeq_Mouse_Brain_mRNAseq/KO_1/KO_1_S4_L001_R2_001.fastq.gz",
+            "read": 2,
+            "bytes": 2316000000
+          }
+        ]
+      },
+      {
+        "sample": "KO_2",
+        "condition": "Treated",
+        "files": [
+          {
+            "file": "KO_2_S5_L001_R1_001.fastq.gz",
+            "path": "250312_NovaSeq_Mouse_Brain_mRNAseq/KO_2/KO_2_S5_L001_R1_001.fastq.gz",
+            "read": 1,
+            "bytes": 2383000000
+          },
+          {
+            "file": "KO_2_S5_L001_R2_001.fastq.gz",
+            "path": "250312_NovaSeq_Mouse_Brain_mRNAseq/KO_2/KO_2_S5_L001_R2_001.fastq.gz",
+            "read": 2,
+            "bytes": 2386000000
+          }
+        ]
+      },
+      {
+        "sample": "KO_3",
+        "condition": "Treated",
+        "files": [
+          {
+            "file": "KO_3_S6_L001_R1_001.fastq.gz",
+            "path": "250312_NovaSeq_Mouse_Brain_mRNAseq/KO_3/KO_3_S6_L001_R1_001.fastq.gz",
+            "read": 1,
+            "bytes": 2453000000
+          },
+          {
+            "file": "KO_3_S6_L001_R2_001.fastq.gz",
+            "path": "250312_NovaSeq_Mouse_Brain_mRNAseq/KO_3/KO_3_S6_L001_R2_001.fastq.gz",
+            "read": 2,
+            "bytes": 2456000000
+          }
+        ]
+      },
+      {
+        "sample": "WT_1",
+        "condition": "Control",
+        "files": [
+          {
+            "file": "WT_1_S1_L001_R1_001.fastq.gz",
+            "path": "250312_NovaSeq_Mouse_Brain_mRNAseq/WT_1/WT_1_S1_L001_R1_001.fastq.gz",
+            "read": 1,
+            "bytes": 2103000000
+          },
+          {
+            "file": "WT_1_S1_L001_R2_001.fastq.gz",
+            "path": "250312_NovaSeq_Mouse_Brain_mRNAseq/WT_1/WT_1_S1_L001_R2_001.fastq.gz",
+            "read": 2,
+            "bytes": 2106000000
+          }
+        ]
+      },
+      {
+        "sample": "WT_2",
+        "condition": "Control",
+        "files": [
+          {
+            "file": "WT_2_S2_L001_R1_001.fastq.gz",
+            "path": "250312_NovaSeq_Mouse_Brain_mRNAseq/WT_2/WT_2_S2_L001_R1_001.fastq.gz",
+            "read": 1,
+            "bytes": 2173000000
+          },
+          {
+            "file": "WT_2_S2_L001_R2_001.fastq.gz",
+            "path": "250312_NovaSeq_Mouse_Brain_mRNAseq/WT_2/WT_2_S2_L001_R2_001.fastq.gz",
+            "read": 2,
+            "bytes": 2176000000
+          }
+        ]
+      },
+      {
+        "sample": "WT_3",
+        "condition": "Control",
+        "files": [
+          {
+            "file": "WT_3_S3_L001_R1_001.fastq.gz",
+            "path": "250312_NovaSeq_Mouse_Brain_mRNAseq/WT_3/WT_3_S3_L001_R1_001.fastq.gz",
+            "read": 1,
+            "bytes": 2243000000
+          },
+          {
+            "file": "WT_3_S3_L001_R2_001.fastq.gz",
+            "path": "250312_NovaSeq_Mouse_Brain_mRNAseq/WT_3/WT_3_S3_L001_R2_001.fastq.gz",
+            "read": 2,
+            "bytes": 2246000000
+          }
+        ]
+      }
+    ]
+  },
+  "design": {
+    "groups": [
+      "Treated",
+      "Control"
+    ],
+    "control": "Control",
+    "contrasts": [
+      {
+        "numerator": "Treated",
+        "denominator": "Control"
+      }
+    ],
+    "paired_design": false
+  },
+  "protocol": {
+    "organism": "mouse",
+    "library": "polya",
+    "strandedness": "reverse",
+    "genome": "latest"
+  },
+  "deliverables": [
+    "deg",
+    "enrich",
+    "bundle",
+    "qc"
+  ],
+  "question": ""
+}
