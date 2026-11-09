@@ -139,13 +139,13 @@ console.log('\nA MATRIX IS THREE FILES, OR ONE h5')
   check('no raw matrix is said in so many words', () => S1().problems.some(p => /no raw matrix/.test(p)), true)
   check('the complete filtered folder still counts', () => S1().filtered.matrix_dir, 'run/S1/outs/filtered_feature_bc_matrix')
 
-  const h5only = scanSingleCell(at('d/S1/outs', CR_H5)).libraries[0]
-  check('h5 files alone make a complete library', () => [h5only.raw.h5, h5only.filtered.h5, h5only.problems],
+  const h5only = () => scanSingleCell(at('d/S1/outs', CR_H5)).libraries[0]
+  check('h5 files alone make a complete library', () => [h5only().raw.h5, h5only().filtered.h5, h5only().problems],
     ['d/S1/outs/raw_feature_bc_matrix.h5', 'd/S1/outs/filtered_feature_bc_matrix.h5', []])
 
-  const older = scanSingleCell(at('cs/S1/outs/raw', ['barcodes.tsv', 'genes.tsv', 'matrix.mtx'])).libraries[0]
-  check('uncompressed, with genes.tsv for features', () => older.raw.matrix_dir, 'cs/S1/outs/raw')
-  check('a missing filtered matrix is noted', () => older.problems, ['no filtered matrix'])
+  const older = () => scanSingleCell(at('cs/S1/outs/raw', ['barcodes.tsv', 'genes.tsv', 'matrix.mtx'])).libraries[0]
+  check('uncompressed, with genes.tsv for features', () => older().raw.matrix_dir, 'cs/S1/outs/raw')
+  check('a missing filtered matrix is noted', () => older().problems, ['no filtered matrix'])
 }
 
 console.log('\nIDENTITY AND BOOKKEEPING')
