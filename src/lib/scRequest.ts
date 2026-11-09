@@ -25,6 +25,7 @@ import type { Contact, FastqFile, Inference } from '../types'
 import { findToken, inferFromScan } from './infer.ts'
 import type { DeliveryKind, ScLibrary, ScMatrix, ScScan } from './scDelivery.ts'
 import { deliveryBlocker, hasMatrix } from './scDelivery.ts'
+import { referenceSpeciesBlocker } from './scReference.ts'
 
 export type Assay = 'scrna' | 'snrna'
 export type Platform = '10x' | 'singleron'
@@ -146,6 +147,9 @@ export function scQuestionBlocker(a: ScAnswers, libraries: (ScLibrary & { name: 
   if (a.reference === 'named' && !a.referenceName.trim()) return 'Name the reference build (question 5).'
   if (a.reference === 'named' && a.referenceName.includes('/'))
     return 'Write the reference build without a slash (question 5): the registry key is <species>/<build>.'
+  // The two halves of the key, held together (scReference.ts): a kept build under a changed organism.
+  const clash = a.reference === 'named' ? referenceSpeciesBlocker(speciesKey(a), a.referenceName.trim()) : null
+  if (clash) return clash
   if (!a.mtPrefix.trim()) return 'Give the mitochondrial gene prefix (question 6).'
   if (!a.riboPattern.trim()) return 'Give the ribosomal gene pattern (question 6).'
   if (!isRegex(a.riboPattern.trim())) return 'The ribosomal gene pattern is not a valid regular expression (question 6).'
