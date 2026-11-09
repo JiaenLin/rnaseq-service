@@ -1,0 +1,251 @@
+{
+  "kind": "single-cell",
+  "request_id": "RTEST01",
+  "created": "2026-01-01T00:00:00.000Z",
+  "contact": {
+    "name": "Jane Doe",
+    "email": "jane@example.test",
+    "org": "",
+    "project": "",
+    "turnaround": "standard",
+    "notes": ""
+  },
+  "data": {
+    "delivery": "cellranger",
+    "n_files": 80,
+    "total_bytes": 80000000,
+    "libraries": [
+      {
+        "sample": "S1",
+        "folder": "Human_PBMC_GRCh38-2024-A/S1",
+        "raw": {
+          "matrix_dir": "Human_PBMC_GRCh38-2024-A/S1/outs/raw_feature_bc_matrix",
+          "h5": "Human_PBMC_GRCh38-2024-A/S1/outs/raw_feature_bc_matrix.h5"
+        },
+        "filtered": {
+          "matrix_dir": "Human_PBMC_GRCh38-2024-A/S1/outs/filtered_feature_bc_matrix",
+          "h5": "Human_PBMC_GRCh38-2024-A/S1/outs/filtered_feature_bc_matrix.h5"
+        },
+        "summary": [
+          "Human_PBMC_GRCh38-2024-A/S1/outs/metrics_summary.csv",
+          "Human_PBMC_GRCh38-2024-A/S1/outs/web_summary.html"
+        ],
+        "bytes": 10000000
+      },
+      {
+        "sample": "S2",
+        "folder": "Human_PBMC_GRCh38-2024-A/S2",
+        "raw": {
+          "matrix_dir": "Human_PBMC_GRCh38-2024-A/S2/outs/raw_feature_bc_matrix",
+          "h5": "Human_PBMC_GRCh38-2024-A/S2/outs/raw_feature_bc_matrix.h5"
+        },
+        "filtered": {
+          "matrix_dir": "Human_PBMC_GRCh38-2024-A/S2/outs/filtered_feature_bc_matrix",
+          "h5": "Human_PBMC_GRCh38-2024-A/S2/outs/filtered_feature_bc_matrix.h5"
+        },
+        "summary": [
+          "Human_PBMC_GRCh38-2024-A/S2/outs/metrics_summary.csv",
+          "Human_PBMC_GRCh38-2024-A/S2/outs/web_summary.html"
+        ],
+        "bytes": 10000000
+      },
+      {
+        "sample": "S3",
+        "folder": "Human_PBMC_GRCh38-2024-A/S3",
+        "raw": {
+          "matrix_dir": "Human_PBMC_GRCh38-2024-A/S3/outs/raw_feature_bc_matrix",
+          "h5": "Human_PBMC_GRCh38-2024-A/S3/outs/raw_feature_bc_matrix.h5"
+        },
+        "filtered": {
+          "matrix_dir": "Human_PBMC_GRCh38-2024-A/S3/outs/filtered_feature_bc_matrix",
+          "h5": "Human_PBMC_GRCh38-2024-A/S3/outs/filtered_feature_bc_matrix.h5"
+        },
+        "summary": [
+          "Human_PBMC_GRCh38-2024-A/S3/outs/metrics_summary.csv",
+          "Human_PBMC_GRCh38-2024-A/S3/outs/web_summary.html"
+        ],
+        "bytes": 10000000
+      },
+      {
+        "sample": "S4",
+        "folder": "Human_PBMC_GRCh38-2024-A/S4",
+        "raw": {
+          "matrix_dir": "Human_PBMC_GRCh38-2024-A/S4/outs/raw_feature_bc_matrix",
+          "h5": "Human_PBMC_GRCh38-2024-A/S4/outs/raw_feature_bc_matrix.h5"
+        },
+        "filtered": {
+          "matrix_dir": "Human_PBMC_GRCh38-2024-A/S4/outs/filtered_feature_bc_matrix",
+          "h5": "Human_PBMC_GRCh38-2024-A/S4/outs/filtered_feature_bc_matrix.h5"
+        },
+        "summary": [
+          "Human_PBMC_GRCh38-2024-A/S4/outs/metrics_summary.csv",
+          "Human_PBMC_GRCh38-2024-A/S4/outs/web_summary.html"
+        ],
+        "bytes": 10000000
+      },
+      {
+        "sample": "S5",
+        "folder": "Human_PBMC_GRCh38-2024-A/S5",
+        "raw": {
+          "matrix_dir": "Human_PBMC_GRCh38-2024-A/S5/outs/raw_feature_bc_matrix",
+          "h5": "Human_PBMC_GRCh38-2024-A/S5/outs/raw_feature_bc_matrix.h5"
+        },
+        "filtered": {
+          "matrix_dir": "Human_PBMC_GRCh38-2024-A/S5/outs/filtered_feature_bc_matrix",
+          "h5": "Human_PBMC_GRCh38-2024-A/S5/outs/filtered_feature_bc_matrix.h5"
+        },
+        "summary": [
+          "Human_PBMC_GRCh38-2024-A/S5/outs/metrics_summary.csv",
+          "Human_PBMC_GRCh38-2024-A/S5/outs/web_summary.html"
+        ],
+        "bytes": 10000000
+      },
+      {
+        "sample": "S6",
+        "folder": "Human_PBMC_GRCh38-2024-A/S6",
+        "raw": {
+          "matrix_dir": "Human_PBMC_GRCh38-2024-A/S6/outs/raw_feature_bc_matrix",
+          "h5": "Human_PBMC_GRCh38-2024-A/S6/outs/raw_feature_bc_matrix.h5"
+        },
+        "filtered": {
+          "matrix_dir": "Human_PBMC_GRCh38-2024-A/S6/outs/filtered_feature_bc_matrix",
+          "h5": "Human_PBMC_GRCh38-2024-A/S6/outs/filtered_feature_bc_matrix.h5"
+        },
+        "summary": [
+          "Human_PBMC_GRCh38-2024-A/S6/outs/metrics_summary.csv",
+          "Human_PBMC_GRCh38-2024-A/S6/outs/web_summary.html"
+        ],
+        "bytes": 10000000
+      },
+      {
+        "sample": "S7",
+        "folder": "Human_PBMC_GRCh38-2024-A/S7",
+        "raw": {
+          "matrix_dir": "Human_PBMC_GRCh38-2024-A/S7/outs/raw_feature_bc_matrix",
+          "h5": "Human_PBMC_GRCh38-2024-A/S7/outs/raw_feature_bc_matrix.h5"
+        },
+        "filtered": {
+          "matrix_dir": "Human_PBMC_GRCh38-2024-A/S7/outs/filtered_feature_bc_matrix",
+          "h5": "Human_PBMC_GRCh38-2024-A/S7/outs/filtered_feature_bc_matrix.h5"
+        },
+        "summary": [
+          "Human_PBMC_GRCh38-2024-A/S7/outs/metrics_summary.csv",
+          "Human_PBMC_GRCh38-2024-A/S7/outs/web_summary.html"
+        ],
+        "bytes": 10000000
+      },
+      {
+        "sample": "S8",
+        "folder": "Human_PBMC_GRCh38-2024-A/S8",
+        "raw": {
+          "matrix_dir": "Human_PBMC_GRCh38-2024-A/S8/outs/raw_feature_bc_matrix",
+          "h5": "Human_PBMC_GRCh38-2024-A/S8/outs/raw_feature_bc_matrix.h5"
+        },
+        "filtered": {
+          "matrix_dir": "Human_PBMC_GRCh38-2024-A/S8/outs/filtered_feature_bc_matrix",
+          "h5": "Human_PBMC_GRCh38-2024-A/S8/outs/filtered_feature_bc_matrix.h5"
+        },
+        "summary": [
+          "Human_PBMC_GRCh38-2024-A/S8/outs/metrics_summary.csv",
+          "Human_PBMC_GRCh38-2024-A/S8/outs/web_summary.html"
+        ],
+        "bytes": 10000000
+      }
+    ]
+  },
+  "protocol": {
+    "assay": "scrna",
+    "platform": "10x",
+    "chemistry": null,
+    "species": "homo_sapiens",
+    "reference": "homo_sapiens/GRCh38-2024-A",
+    "mt_prefix": "MT-",
+    "ribo_pattern": "^RP[SL]",
+    "dbr": 0.08,
+    "dbr_method": "stated"
+  },
+  "answered_by": {
+    "assay": "user",
+    "platform": "detected",
+    "chemistry": "user",
+    "species": "detected",
+    "reference": "detected",
+    "mt_prefix": "user",
+    "ribo_pattern": "user",
+    "dbr": "user"
+  },
+  "question": "",
+  "design": {
+    "factors": [
+      {
+        "name": "factor_a",
+        "levels": [
+          "a1",
+          "a2"
+        ],
+        "reference": "a1"
+      },
+      {
+        "name": "factor_b",
+        "levels": [
+          "b1",
+          "b2"
+        ],
+        "reference": "b1"
+      }
+    ],
+    "covariates": [
+      "batch"
+    ],
+    "table": [
+      {
+        "sample": "S1",
+        "factor_a": "a1",
+        "factor_b": "b1",
+        "batch": "p1"
+      },
+      {
+        "sample": "S2",
+        "factor_a": "a1",
+        "factor_b": "b1",
+        "batch": "p2"
+      },
+      {
+        "sample": "S3",
+        "factor_a": "a1",
+        "factor_b": "b2",
+        "batch": "p1"
+      },
+      {
+        "sample": "S4",
+        "factor_a": "a1",
+        "factor_b": "b2",
+        "batch": "p2"
+      },
+      {
+        "sample": "S5",
+        "factor_a": "a2",
+        "factor_b": "b1",
+        "batch": "p1"
+      },
+      {
+        "sample": "S6",
+        "factor_a": "a2",
+        "factor_b": "b1",
+        "batch": "p2"
+      },
+      {
+        "sample": "S7",
+        "factor_a": "a2",
+        "factor_b": "b2",
+        "batch": "p1"
+      },
+      {
+        "sample": "S8",
+        "factor_a": "a2",
+        "factor_b": "b2",
+        "batch": "p2"
+      }
+    ]
+  }
+}
