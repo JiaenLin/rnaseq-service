@@ -29,4 +29,8 @@ dist-ssr
 *.fq
 *.fq.gz
 rnaseq-request-*.json
+scrnaseq-request-*.json
 samplesheet-*.csv
+*.h5
+*.mtx
+*.mtx.gz
