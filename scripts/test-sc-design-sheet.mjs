@@ -26,8 +26,8 @@ const { EMPTY_SC_ANSWERS, ASSAYS, PLATFORMS, inferScAnswers, scQuestionBlocker, 
   await load('../src/lib/scRequest.ts')
 const { EMPTY_SC_DESIGN, designBlocker, buildScRequestWithDesign } = await load('../src/lib/scDesign.ts')
 const {
-  SCQC_COMMIT, SAMPLESHEET_COLUMNS, RESERVED_COLUMNS, REQUEST_ONLY, REGISTRY_COLUMNS,
-  buildScSamplesheet, buildRegistryRow, buildRegistryTsv, buildDesignCsv,
+  SCQC_COMMIT, SAMPLESHEET_COLUMNS, RESERVED_COLUMNS, REQUEST_ONLY, REGISTRY_COLUMNS, ALIGNER_CELLS_REQUIRED_FOR,
+  buildScSamplesheet, buildRegistryRow, buildRegistryTsv, buildDesignCsv, stage1Refusals,
 } = await load('../src/lib/scSheets.ts')
 const { buildSpecies } = await load('../src/lib/scReference.ts')
 
@@ -183,6 +183,8 @@ check('the contract check catches a drifted writer: chemistry added, or assay dr
   const header = headerOf(buildScSamplesheet(req()))
   return [contractProblems([...header, 'chemistry'], designCols), contractProblems(header.filter(c => c !== 'assay'), designCols)]
 }, [['chemistry would be read as a design factor', 'chemistry is request-only'], ['missing assay']])
+check('the aligner\'s cell call (aligner_cells) is needed for every assay scQC needs it for: compared at step 2 on nuclei, the call itself on cells',
+  () => [...ALIGNER_CELLS_REQUIRED_FOR].sort(), [...contract.samplesheet.aligner_cells.required_for].sort())
 
 console.log('\nTHE DESIGN TABLE: A 2×2 WITH TWO LIBRARIES PER ARM (P03)')
 check('the request carries the design: factors, their levels, the reference of each, the covariate', () => req().design, {
@@ -311,11 +313,20 @@ check('a root rebases every path onto where the delivery sits', () => {
   }, ['singleron', 'homo_sapiens/GRCh38-2020-A', 'run/C2/C2/outs/raw', 'run/C2/C2/outs/filtered'])
 }
 {
+  // scQC needs the aligner's cell call for every library, and reads it only from the aligner's own
+  // output: on nuclei its step 2 compares it with the denoiser's call and refuses without it, after the
+  // denoiser has run. A sheet without it would die there, so the two files that need it wait, saying why.
   const noFiltered = [...crFiles.filter(f => /\/S[12]\//.test(f.path)), ...at(id('S3') + '/outs', ['raw_feature_bc_matrix.h5'])]
-  check('nuclei without a filtered matrix: aligner_cells is left blank, never invented', () => {
-    const r = viaJson(request({ ...FULL(), assay: 'snrna' }, { ...EMPTY_SC_DESIGN, compare: 'no' }, libs(noFiltered), noFiltered))
-    return scqcRows(buildScSamplesheet(r)).map(x => x.aligner_cells === '')
-  }, [false, false, true])
+  const nuclei = () => viaJson(request({ ...FULL(), assay: 'snrna' }, { ...EMPTY_SC_DESIGN, compare: 'no' }, libs(noFiltered), noFiltered))
+  check('nuclei without a filtered matrix: no samplesheet and no registry row, the reason naming the library and scQC\'s step 2', () => {
+    const r = nuclei()
+    const why = refusal(() => buildScSamplesheet(r))
+    return [/“S3”/.test(why), /step 2/.test(why), /filtered_feature_bc_matrix/.test(why), refusal(() => buildRegistryRow(r)) === why]
+  }, [true, true, true, true])
+  check('the request is still written, and its design table: only the two files that need the call wait', () => {
+    const r = nuclei()
+    return [r.kind, buildDesignCsv(r), Object.entries(stage1Refusals(r)).map(([file, why]) => `${file}: ${why ? 'held' : 'written'}`)]
+  }, ['single-cell', 'sample\nS1\nS2\nS3\n', ['samplesheet: held', 'registry: held', 'design: written']])
 }
 check('chemistry and dbr_method never reach the samplesheet, named or derived', () => {
   const r = viaJson(request({ ...FULL(), chemistry: 'named', chemistryName: '3p v4', dbr: 'derive', dbrPercent: '' }))

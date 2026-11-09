@@ -36,5 +36,14 @@ export const REQUEST_ONLY: readonly string[] = ['chemistry', 'dbr_method']
  */
 export const RESERVED_COLUMNS: readonly string[] = [...NOT_FACTORS, ...REQUEST_ONLY]
 
+/**
+ * The assays for which every library needs `aligner_cells`, the aligner's own cell call: all of them
+ * (scQC engine/graph.py and engine/steps.py). A single cell is not denoised, so the aligner's call IS
+ * its cell call, and a library without one is refused before anything is submitted. A nucleus is
+ * denoised, and step 2 compares the aligner's call with the denoiser's, refusing without it after the
+ * denoiser has run. scQC reads the call from nowhere else than the aligner's filtered matrix.
+ */
+export const ALIGNER_CELLS_REQUIRED_FOR: readonly string[] = ['snrna', 'scrna']
+
 /** The project registry's columns (scQC's setup/init_project.sh): tab-separated, keyed `<species>/<build>`. */
 export const REGISTRY_COLUMNS: readonly string[] = ['species', 'build', 'path', 'built_by', 'star_version', 'notes']

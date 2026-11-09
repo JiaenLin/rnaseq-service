@@ -63,6 +63,13 @@ export default function ScStepDesign(p: Props) {
             <b>{noFiltered.join(', ')}</b> {noFiltered.length > 1 ? 'have' : 'has'} none. Ask your provider for it.
           </div>
         )}
+        {a.assay === 'snrna' && noFiltered.length > 0 && (
+          <div className="warnbox mt-3">
+            For single nuclei, quality control compares the aligner's cell call with the denoiser's, and{' '}
+            <b>{noFiltered.join(', ')}</b> {noFiltered.length > 1 ? 'have' : 'has'} no filtered matrix to give it. The
+            request can still be sent, but the analysis files wait until your provider sends it.
+          </div>
+        )}
       </div>
 
       <div>

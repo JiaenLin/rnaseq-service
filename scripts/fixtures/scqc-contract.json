@@ -55,6 +55,31 @@
         "10x",
         "singleron"
       ]
+    },
+    "aligner_cells": {
+      "denoise": {
+        "from": "modules/01_ambient/ambient.py:59",
+        "values": {
+          "snrna": true,
+          "scrna": false
+        }
+      },
+      "not_denoised": {
+        "from": "engine/graph.py:152-153",
+        "rule": "the aligner's call is the cell call; refused before anything is submitted without it"
+      },
+      "compared_at_step_2": {
+        "from": "engine/graph.py:275",
+        "rule": "every library not in not_denoised is called by the denoiser and compared"
+      },
+      "denoised": {
+        "from": "engine/steps.py:603-605",
+        "rule": "step 2 (02_cells) refuses a compared library without it"
+      },
+      "required_for": [
+        "snrna",
+        "scrna"
+      ]
     }
   },
   "registry": {

@@ -7,7 +7,8 @@
 // (scColumns.ts): sample, platform, species, reference, assay, then
 //   matrix         the raw matrix: every droplet. Its MatrixMarket folder, else its .h5;
 //   aligner_cells  the aligner's filtered matrix, its cell call: the folder, which scQC reads without
-//                  h5py, else the .h5, else blank (nuclei may come without one; it is never invented);
+//                  h5py, else the .h5. scQC needs it for every library (scColumns.ts,
+//                  ALIGNER_CELLS_REQUIRED_FOR), so a library without one holds the sheet back;
 //   mt_prefix, ribo_pattern;
 //   dbr            the stated doublet rate as a fraction, else blank: scQC then takes `--dbr`, and
 //                  refuses rather than default when none is given.
@@ -21,16 +22,19 @@
 // were delivered as matrices, so nothing aligns, and scQC reads the path only to align.
 //
 // Each writer refuses (throws, with the reason) a request it cannot write truly: no named reference,
-// no design, a species its build contradicts, or a value that would break a line.
+// no design, a species its build contradicts, a library without the aligner's cell call, or a value
+// that would break a line.
 
 import type { ScRequest } from './scRequest.ts'
 import { ASSAYS, PLATFORMS, libraryNameBlocker } from './scRequest.ts'
 import type { ScDesign } from './scDesign.ts'
 import { cell, checkDesign } from './scDesign.ts'
-import { REGISTRY_COLUMNS, SAMPLESHEET_COLUMNS } from './scColumns.ts'
+import { ALIGNER_CELLS_REQUIRED_FOR, REGISTRY_COLUMNS, SAMPLESHEET_COLUMNS } from './scColumns.ts'
 import { referenceSpeciesBlocker } from './scReference.ts'
 
-export { REGISTRY_COLUMNS, REQUEST_ONLY, RESERVED_COLUMNS, SAMPLESHEET_COLUMNS, SCQC_COMMIT } from './scColumns.ts'
+export {
+  ALIGNER_CELLS_REQUIRED_FOR, REGISTRY_COLUMNS, REQUEST_ONLY, RESERVED_COLUMNS, SAMPLESHEET_COLUMNS, SCQC_COMMIT,
+} from './scColumns.ts'
 
 /** A request as read back from its file: written before the design step, it has no design. */
 type Req = ScRequest & { design?: ScDesign }
@@ -51,6 +55,17 @@ function requestProblem(r: Req): string | null {
   if (!p.mt_prefix || !p.ribo_pattern) return 'The mitochondrial prefix and the ribosomal pattern are both needed (question 6).'
   const noRaw = r.data.libraries.filter(l => !matrixOf(l.raw)).map(l => l.sample)
   if (noRaw.length) return `${noRaw.join(', ')}: no raw matrix, and quality control starts from every droplet.`
+  // The samplesheet and its registry row are stage 1's input together, so both wait for the call.
+  const noCall = ALIGNER_CELLS_REQUIRED_FOR.includes(p.assay)
+    ? r.data.libraries.filter(l => !matrixOf(l.filtered)).map(l => `“${l.sample}”`) : []
+  if (noCall.length)
+    return `${noCall.join(', ')} ${noCall.length > 1 ? 'have' : 'has'} no filtered matrix, the aligner's own cell ` +
+      `call, and scQC needs it for every library: ${p.assay === 'snrna'
+        ? 'on nuclei its step 2 compares that call with the denoiser\'s and refuses without it, after the denoiser has run'
+        : 'on single cells it is the cell call, and a library without it is refused before anything runs'}. ` +
+      'scQC reads the call from nowhere else (the filtered matrix as its folder, its barcodes file or its .h5), so ' +
+      `the samplesheet and its registry row wait for ${r.data.delivery === 'celescope' ? 'outs/filtered' : 'filtered_feature_bc_matrix'} ` +
+      'from your provider.'
   return null
 }
 

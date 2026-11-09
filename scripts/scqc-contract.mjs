@@ -17,6 +17,8 @@ import { pathToFileURL } from 'node:url'
 
 const INGEST = 'modules/00_ingest/ingest.py'
 const STEPS = 'engine/steps.py'
+const GRAPH = 'engine/graph.py'
+const AMBIENT = 'modules/01_ambient/ambient.py'
 const INIT = 'setup/init_project.sh'
 
 function find(root, file, rx, what) {
@@ -46,6 +48,22 @@ export function scqcContract(root) {
   const key = find(root, INGEST, /^ {12}out\[f"\{f\[(\d)\]\}(.)\{f\[(\d)\]\}"\] = f\[\d\]$/m, 'the registry key')
   const columns = find(root, INIT, /^printf '([^']*)\\n' > "\$DIR\/registry\.tsv"$/m, 'the registry header')
 
+  // Which libraries need `aligner_cells`, the aligner's own cell call. The assay's policy says whether
+  // a library is denoised (DENOISE). One that is not takes the aligner's call AS its cell call, and is
+  // refused before anything is submitted without it (graph.py); every other library is compared at
+  // step 2 with the denoiser's call (call_by), and step 2 refuses without it (steps.py). Both rules
+  // found means every assay needs it; should either move, this fails rather than narrow the list.
+  const denoise = find(root, AMBIENT, /^DENOISE = \{([^}]*)\}/m, 'DENOISE')
+  const undenoised = find(root, GRAPH,
+    /^ *lacking = \[s for s in not_denoised\n *if not str\(by_sample\[s\]\.get\("aligner_cells"\) or ""\)\.strip\(\)\]$/m,
+    'the undenoised libraries\' aligner_cells rule')
+  const callBy = find(root, GRAPH,
+    /^ *call_by = \{s: \("aligner" if s in not_denoised else "denoiser"\) for s in by_sample\}$/m, 'step 2\'s caller per library')
+  const compared = find(root, STEPS,
+    /^ *a_path = pth\.get\("aligner"\)\n *if not a_path:\n *missing\.append\(f"\{s\}: aligner_cells"\)$/m,
+    'step 2\'s aligner_cells rule')
+  const policy = Object.fromEntries([...denoise.m[1].matchAll(/"([^"]+)":\s*(True|False)/g)].map(x => [x[1], x[2] === 'True']))
+
   return {
     source: {
       repository: 'scQC',
@@ -57,6 +75,13 @@ export function scqcContract(root) {
       not_factors: { from: notFactors.from, columns: strings(notFactors.m[1]) },
       assays: { from: assays.from, values: strings(assays.m[1]) },
       platforms: { from: platforms.from, values: strings(platforms.m[1]).filter((_, i) => i % 2 === 0) },
+      aligner_cells: {
+        denoise: { from: denoise.from, values: policy },
+        not_denoised: { from: undenoised.from, rule: 'the aligner\'s call is the cell call; refused before anything is submitted without it' },
+        compared_at_step_2: { from: callBy.from, rule: 'every library not in not_denoised is called by the denoiser and compared' },
+        denoised: { from: compared.from, rule: 'step 2 (02_cells) refuses a compared library without it' },
+        required_for: Object.keys(policy),
+      },
     },
     registry: {
       columns: { from: columns.from, names: columns.m[1].split('\\t') },

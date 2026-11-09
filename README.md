@@ -107,7 +107,7 @@ share, which this request cannot express yet.
 
 | Question | Pre-filled from the file names? |
 |---|---|
-| 1 · Single cells or single nuclei | **Never.** There is no default, and Continue stays blocked until you answer. For single cells, every library also needs its filtered matrix |
+| 1 · Single cells or single nuclei | **Never.** There is no default, and Continue stays blocked until you answer. For single cells, every library also needs its filtered matrix; for single nuclei, the analysis files wait for it (see below) |
 | 2 · Platform | From the layout: Cell Ranger is 10x, CeleScope is Singleron |
 | 3 · Chemistry | Never. *Not sure* is an answer: the aligner records it for every library |
 | 4 · Organism | From a species or build token in the paths, as for bulk |
@@ -174,7 +174,10 @@ paths are relative to the folder you dropped, so whoever runs the analysis place
 - **`scrnaseq-design-<id>.csv`**, the design table (`design.csv`): keyed on `sample`, the factors then the
   covariates.
 
-A reference left *Not sure* holds back the samplesheet and the registry row, which need it. The golden
+A reference left *Not sure* holds back the samplesheet and the registry row, which need it. So does a
+library without a filtered matrix: the QC tool needs the aligner's cell call for every library (for
+single nuclei, its step 2 compares that call with the denoiser's) and reads it from nowhere else. The
+request and the design table are still written. The golden
 files in [`scripts/fixtures/`](scripts/fixtures/) (`sc-samplesheet.tsv`, `sc-registry.tsv`,
 `sc-design.csv`) show each one for a 2×2 design.
 
