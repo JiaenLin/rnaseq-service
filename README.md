@@ -98,8 +98,10 @@ A library is the folder holding the matrices, or holding their `outs/`. For each
 
 A matrix folder counts only when all three of its files are present: `matrix.mtx`, `barcodes.tsv`,
 and `features.tsv` or `genes.tsv`, each gzipped or not. A missing file is named. A library without
-a raw matrix blocks step A. Cell Ranger `multi` output (`per_sample_outs/`) is recognised and refused
-by name: its raw matrix is shared by every sample of a GEM well, which this request cannot express yet.
+a raw matrix blocks step A. Cell Ranger `multi` output is recognised and refused by name, whether it
+arrives as `per_sample_outs/` or as matrices named `sample_raw_feature_bc_matrix` and
+`sample_filtered_feature_bc_matrix`: there, a raw matrix belongs to a GEM well that several samples
+share, which this request cannot express yet.
 
 **The questions, and what is pre-filled:**
 

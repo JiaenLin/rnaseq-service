@@ -74,8 +74,18 @@ const PART_NAMES: [Part, string[]][] = [
 const PART_OF = new Map(PART_NAMES.flatMap(([part, names]) => names.map(n => [n, part] as const)))
 
 type Which = 'raw' | 'filtered'
-const CR_DIR: Record<string, Which> = { raw_feature_bc_matrix: 'raw', filtered_feature_bc_matrix: 'filtered' }
-const CR_H5: Record<string, Which> = { 'raw_feature_bc_matrix.h5': 'raw', 'filtered_feature_bc_matrix.h5': 'filtered' }
+// `sample_*` are Cell Ranger multi's per-sample matrices: recognised, so that such a delivery is
+// never mistaken for a FASTQ one, and then refused by name (see MULTI below).
+const CR_DIR: Record<string, Which> = {
+  raw_feature_bc_matrix: 'raw', filtered_feature_bc_matrix: 'filtered',
+  sample_raw_feature_bc_matrix: 'raw', sample_filtered_feature_bc_matrix: 'filtered',
+}
+const CR_H5: Record<string, Which> = {
+  'raw_feature_bc_matrix.h5': 'raw', 'filtered_feature_bc_matrix.h5': 'filtered',
+  'sample_raw_feature_bc_matrix.h5': 'raw', 'sample_filtered_feature_bc_matrix.h5': 'filtered',
+}
+/** A path segment only Cell Ranger multi writes. A library merely called `sample_1` is not one. */
+const MULTI = (seg: string) => seg === 'per_sample_outs' || /^sample_(raw|filtered)_feature_bc_matrix(\.h5)?$/.test(seg)
 const CR_SUMMARY = new Set(['metrics_summary.csv', 'web_summary.html'])
 const CS_SUMMARY = /_report\.html$/
 
@@ -163,11 +173,12 @@ export function scanSingleCell(files: FastqFile[]): ScScan {
     n_files: kept.length, bytes: kept.reduce((a, f) => a + f.size, 0), unsupported: null,
   }
   // Cell Ranger multi writes one raw matrix per GEM well, shared by every sample in it, and each
-  // sample's own matrix under per_sample_outs/. Grouped by folder it would read as one library
-  // called "count"; refusing by name is better than a request that is quietly wrong.
-  if (kind === 'cellranger' && kept.some(f => f.path.split('/').includes('per_sample_outs')))
-    scan.unsupported = 'This is Cell Ranger multi output (per_sample_outs/), which this request does not ' +
-      'handle yet: its raw matrix is shared by every sample of a GEM well.'
+  // sample's own matrices under per_sample_outs/, named sample_*_feature_bc_matrix. Grouped by
+  // folder it would read as libraries called "count"; refusing by name is better than a request
+  // that is quietly wrong. Either sign is enough: providers flatten per_sample_outs/ away too.
+  if (kind === 'cellranger' && kept.some(f => f.path.split('/').some(MULTI)))
+    scan.unsupported = 'This is Cell Ranger multi output (per_sample_outs/, sample_*_feature_bc_matrix), which ' +
+      'this request does not handle yet: there, a raw matrix belongs to a GEM well that several samples share.'
   if (kind === 'fastq') {
     scan.other = kept.map(f => f.path).sort(byPath)
     return scan
