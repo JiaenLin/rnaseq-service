@@ -220,7 +220,9 @@ export function buildScRequest(
     ?? scQuestionBlocker(a, libraries)
   if (refusal) throw new Error(refusal)
 
-  const by = (...keys: (keyof ScInferences)[]) => (keys.some(k => inferred[k]) ? 'detected' as const : 'user' as const)
+  // "detected" only while EVERY key of the answer is still the file names': a retyped build, or
+  // "Not sure" over a detected one, is the customer's answer.
+  const by = (...keys: (keyof ScInferences)[]) => (keys.every(k => inferred[k]) ? 'detected' as const : 'user' as const)
   const species = speciesKey(a)
   const dbr = a.dbr === 'stated' ? Number((percent(a.dbrPercent)! / 100).toFixed(6)) : null
   return {
@@ -259,7 +261,7 @@ export function buildScRequest(
       assay: 'user',
       platform: by('platform'),
       chemistry: by('chemistry', 'chemistryName'),
-      species: by('species', 'speciesOther'),
+      species: by('species'),
       reference: by('reference', 'referenceName'),
       mt_prefix: by('mtPrefix'),
       ribo_pattern: by('riboPattern'),
